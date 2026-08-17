@@ -1,4 +1,4 @@
-# Poker Trainer (working title)
+# Freeroll (working name)
 
 A free, open-source solo poker trainer: play beautiful No-Limit Hold'em against a cast of
 bots that feel human — they tilt, adapt, have tells — while a deterministic analysis engine

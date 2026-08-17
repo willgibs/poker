@@ -1,0 +1,36 @@
+Hand #1: Hold'em No Limit ($0.50/$1.00)
+Table 'sess-fixture-001' 6-max Seat #1 is the button
+Seat 1: Player 1 ($100.00 in chips)
+Seat 2: Player 2 ($100.00 in chips)
+Seat 3: Player 3 ($100.00 in chips)
+Seat 4: Player 4 ($100.00 in chips)
+Seat 5: Player 5 ($100.00 in chips)
+Seat 6: Player 6 ($100.00 in chips)
+Player 2: posts small blind $0.50
+Player 3: posts big blind $1.00
+*** HOLE CARDS ***
+Dealt to Player 5 [As Ks]
+Player 4: folds
+Player 5: raises $2.00 to $3.00
+Player 6: folds
+Player 1: folds
+Player 2: folds
+Player 3: calls $2.00
+*** FLOP *** [Ah 7d 2c]
+Player 3: checks
+Player 5: bets $4.00
+Player 3: calls $4.00
+*** TURN *** [Ah 7d 2c] [Td]
+Player 3: checks
+Player 5: checks
+*** RIVER *** [Ah 7d 2c Td] [3s]
+Player 3: checks
+Player 5: bets $8.00
+Player 3: calls $8.00
+*** SHOW DOWN ***
+Player 5: shows [As Ks]
+Player 3: shows [Ad Qd]
+Player 5 collected $30.50 from pot
+*** SUMMARY ***
+Total pot $30.50
+Board [Ah 7d 2c Td 3s]

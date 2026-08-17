@@ -24,7 +24,7 @@ Three rings, one-way data flow:
   named streams: `"deck"` (full shuffle up-front — the runout is fixed before any action),
   `"bot/{seat}/{street}/{n}"` (decisions keyed by structural position, so what-if branches
   re-decide with the same luck), `"mc/{decisionKey}"` (fixed-iteration Monte Carlo).
-  SplitMix64 derives stream seeds; xoshiro256** generates within streams (`packages/rng`).
+  splitmix32 derives stream seeds; xoshiro128** generates within streams (`packages/rng`).
 - **Purity:** `engine` is `(TableState, Action) → { state, events[] }`. Bots are
   `decide(snapshot, botState, streams) → { action, sizing, thinkTimeMs, trace, nextBotState }`.
 

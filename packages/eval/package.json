@@ -2,5 +2,9 @@
   "name": "@poker/eval",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts" }
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "bench": "node --import tsx bench/bench.ts",
+    "tablegen": "node --import tsx tablegen/generate.ts"
+  }
 }

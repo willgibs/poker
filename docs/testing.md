@@ -12,7 +12,7 @@ lighter-touch elsewhere. Vitest + fast-check throughout; engine packages run in 
   generated action sequences; side pots vs a brute-force oracle; legality (generated illegal
   actions always rejected, legal accepted). Golden replays: committed `(seed, config, actions)`
   fixtures must re-emit byte-identical event logs.
-- **RNG (`rng`):** known-answer vectors for SplitMix64/xoshiro256**; stream independence.
+- **RNG (`rng`):** known-answer vectors for splitmix32/xoshiro128**; stream independence.
 - **Equity:** MC within 3 standard errors of exact enumeration on a spot corpus; symmetry
   and dominance properties.
 - **Bots:** statistical envelopes — simulated VPIP/PFR/AF per persona within bounds over

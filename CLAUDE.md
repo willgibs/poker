@@ -23,10 +23,10 @@ Run a single package's tests: `pnpm vitest run packages/eval`.
 | Package | Responsibility | May depend on |
 |---|---|---|
 | `packages/core` | Cards, deck, combos, positions, chip math, board texture | nothing |
-| `packages/rng` | Seeded RNG: SplitMix64 derivation, xoshiro256** streams | nothing |
+| `packages/rng` | Seeded RNG: splitmix32 derivation, xoshiro128** streams | nothing |
 | `packages/eval` | 7-card hand evaluator (two-table lookup) + table generation | core |
-| `packages/engine` | Pure NLHE reducer: betting rules, side pots, hand lifecycle | core |
 | `packages/history` | Canonical hand event log (versioned), serialization, exports | core |
+| `packages/engine` | Pure NLHE reducer: betting rules, side pots, hand lifecycle | core, history (types) |
 | `packages/ranges` | Weighted combo vectors, archetype distortion, Bayesian filtering | core, charts |
 | `packages/equity` | Exact enumeration + Monte Carlo equity, EV helpers | core, eval, rng, ranges |
 | `packages/charts` | Preflop chart data + accessors, Nash push/fold | core |

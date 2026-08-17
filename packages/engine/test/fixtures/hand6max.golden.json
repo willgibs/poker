@@ -1,0 +1,295 @@
+[
+  {
+    "t": "start",
+    "handNumber": 42,
+    "button": 3,
+    "seats": [
+      {
+        "seat": 1,
+        "stack": 10000
+      },
+      {
+        "seat": 2,
+        "stack": 10000
+      },
+      {
+        "seat": 3,
+        "stack": 10000
+      },
+      {
+        "seat": 4,
+        "stack": 10000
+      },
+      {
+        "seat": 5,
+        "stack": 10000
+      },
+      {
+        "seat": 6,
+        "stack": 10000
+      }
+    ],
+    "blinds": {
+      "sb": 50,
+      "bb": 100,
+      "ante": 10
+    }
+  },
+  {
+    "t": "post",
+    "seat": 4,
+    "kind": "ante",
+    "amount": 10
+  },
+  {
+    "t": "post",
+    "seat": 5,
+    "kind": "ante",
+    "amount": 10
+  },
+  {
+    "t": "post",
+    "seat": 6,
+    "kind": "ante",
+    "amount": 10
+  },
+  {
+    "t": "post",
+    "seat": 1,
+    "kind": "ante",
+    "amount": 10
+  },
+  {
+    "t": "post",
+    "seat": 2,
+    "kind": "ante",
+    "amount": 10
+  },
+  {
+    "t": "post",
+    "seat": 3,
+    "kind": "ante",
+    "amount": 10
+  },
+  {
+    "t": "post",
+    "seat": 4,
+    "kind": "sb",
+    "amount": 50
+  },
+  {
+    "t": "post",
+    "seat": 5,
+    "kind": "bb",
+    "amount": 100
+  },
+  {
+    "t": "hole",
+    "seat": 4,
+    "cards": [
+      0,
+      4
+    ]
+  },
+  {
+    "t": "hole",
+    "seat": 5,
+    "cards": [
+      21,
+      25
+    ]
+  },
+  {
+    "t": "hole",
+    "seat": 6,
+    "cards": [
+      1,
+      5
+    ]
+  },
+  {
+    "t": "hole",
+    "seat": 1,
+    "cards": [
+      50,
+      49
+    ]
+  },
+  {
+    "t": "hole",
+    "seat": 2,
+    "cards": [
+      47,
+      43
+    ]
+  },
+  {
+    "t": "hole",
+    "seat": 3,
+    "cards": [
+      8,
+      12
+    ]
+  },
+  {
+    "t": "act",
+    "seat": 6,
+    "kind": "fold"
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "raise",
+    "toAmount": 250
+  },
+  {
+    "t": "act",
+    "seat": 2,
+    "kind": "call",
+    "amount": 250
+  },
+  {
+    "t": "act",
+    "seat": 3,
+    "kind": "fold"
+  },
+  {
+    "t": "act",
+    "seat": 4,
+    "kind": "fold"
+  },
+  {
+    "t": "act",
+    "seat": 5,
+    "kind": "call",
+    "amount": 150
+  },
+  {
+    "t": "board",
+    "street": "flop",
+    "cards": [
+      51,
+      35,
+      2
+    ]
+  },
+  {
+    "t": "act",
+    "seat": 5,
+    "kind": "check"
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "bet",
+    "amount": 300
+  },
+  {
+    "t": "act",
+    "seat": 2,
+    "kind": "call",
+    "amount": 300
+  },
+  {
+    "t": "act",
+    "seat": 5,
+    "kind": "fold"
+  },
+  {
+    "t": "board",
+    "street": "turn",
+    "cards": [
+      18
+    ]
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "bet",
+    "amount": 700
+  },
+  {
+    "t": "act",
+    "seat": 2,
+    "kind": "call",
+    "amount": 700
+  },
+  {
+    "t": "board",
+    "street": "river",
+    "cards": [
+      6
+    ]
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "check"
+  },
+  {
+    "t": "act",
+    "seat": 2,
+    "kind": "bet",
+    "amount": 1500
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "call",
+    "amount": 1500
+  },
+  {
+    "t": "showdown",
+    "reveals": [
+      {
+        "seat": 2,
+        "cards": [
+          47,
+          43
+        ]
+      },
+      {
+        "seat": 1,
+        "cards": [
+          50,
+          49
+        ]
+      }
+    ]
+  },
+  {
+    "t": "pot",
+    "potIndex": 0,
+    "seat": 1,
+    "amount": 5860
+  },
+  {
+    "t": "end",
+    "net": [
+      {
+        "seat": 1,
+        "net": 3100
+      },
+      {
+        "seat": 2,
+        "net": -2760
+      },
+      {
+        "seat": 3,
+        "net": -10
+      },
+      {
+        "seat": 4,
+        "net": -60
+      },
+      {
+        "seat": 5,
+        "net": -260
+      },
+      {
+        "seat": 6,
+        "net": -10
+      }
+    ]
+  }
+]
