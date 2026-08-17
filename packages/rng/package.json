@@ -1,0 +1,6 @@
+{
+  "name": "@poker/rng",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" }
+}
