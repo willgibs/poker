@@ -1,0 +1,10 @@
+{
+  "name": "@poker/equity",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": {
+    "@poker/core": "workspace:*",
+    "@poker/rng": "workspace:*"
+  }
+}
