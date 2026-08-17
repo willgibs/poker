@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "bench:eval": "node --import tsx packages/eval/bench/bench.ts"
+    "bench:eval": "node --import tsx packages/eval/bench/bench.ts",
+    "tokens:build": "node --import tsx tooling/tokens-build/build.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

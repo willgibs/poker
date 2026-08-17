@@ -1,0 +1,226 @@
+/*
+ * GENERATED FILE — do not edit.
+ * Source: packages/ui/src/tokens/*.ts
+ * Regenerate: pnpm tokens:build
+ *
+ * Layer 1 (primitives) + layer 2 (semantic, resolved for the default skin)
+ * land in :root. Layer 3 re-resolves the whole semantic layer per skin, so a
+ * [data-skin] block is self-contained and switching skins cannot leave a
+ * token behind.
+ */
+
+:root {
+  /* ink ramp */
+  --fr-ink-0: #07080a;
+  --fr-ink-50: #0a0b0e;
+  --fr-ink-100: #0b0c10;
+  --fr-ink-150: #0e0f14;
+  --fr-ink-200: #121016;
+  --fr-ink-250: #16181d;
+  --fr-ink-300: #1d1f27;
+  --fr-ink-400: #2a2c36;
+  --fr-ink-500: #3d3f4d;
+  --fr-ink-600: #5c5966;
+  --fr-ink-700: #7b7889;
+  --fr-ink-800: #918e9f;
+  --fr-ink-900: #c9c2d1;
+  --fr-ink-950: #e6e4ee;
+  --fr-ink-1000: #fbfaf7;
+
+  /* space (4-based) */
+  --fr-space-0: 0px;
+  --fr-space-1: 4px;
+  --fr-space-2: 8px;
+  --fr-space-3: 12px;
+  --fr-space-4: 16px;
+  --fr-space-5: 20px;
+  --fr-space-6: 24px;
+  --fr-space-8: 32px;
+  --fr-space-10: 40px;
+  --fr-space-12: 48px;
+  --fr-space-16: 64px;
+  --fr-space-20: 80px;
+  --fr-space-24: 96px;
+
+  /* radii */
+  --fr-radius-none: 0px;
+  --fr-radius-xs: 4px;
+  --fr-radius-sm: 6px;
+  --fr-radius-md: 10px;
+  --fr-radius-lg: 14px;
+  --fr-radius-xl: 18px;
+  --fr-radius-xxl: 24px;
+  --fr-radius-pill: 999px;
+  --fr-radius-circle: 50%;
+
+  /* font stacks */
+  --fr-font-display: "Avenir Next", Futura, "Century Gothic", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --fr-font-body: "Avenir Next", Futura, "Century Gothic", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --fr-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  /* type scale */
+  --fr-font-size-display-xl: 44px;
+  --fr-font-size-display-lg: 34px;
+  --fr-font-size-display-md: 27px;
+  --fr-font-size-display-sm: 21px;
+  --fr-font-size-body-lg: 16.5px;
+  --fr-font-size-body-md: 15px;
+  --fr-font-size-body-sm: 13.5px;
+  --fr-font-size-body-xs: 12.5px;
+  --fr-font-size-label-lg: 13px;
+  --fr-font-size-label-md: 11.5px;
+  --fr-font-size-label-sm: 10px;
+
+  /* weights */
+  --fr-font-weight-regular: 400;
+  --fr-font-weight-medium: 500;
+  --fr-font-weight-semibold: 600;
+  --fr-font-weight-bold: 700;
+
+  /* line heights */
+  --fr-line-height-tight: 1.1;
+  --fr-line-height-snug: 1.25;
+  --fr-line-height-normal: 1.5;
+  --fr-line-height-relaxed: 1.6;
+
+  /* tracking */
+  --fr-letter-spacing-tighter: -0.02em;
+  --fr-letter-spacing-tight: -0.015em;
+  --fr-letter-spacing-snug: -0.01em;
+  --fr-letter-spacing-normal: 0em;
+  --fr-letter-spacing-wide: 0.14em;
+  --fr-letter-spacing-wider: 0.18em;
+  --fr-letter-spacing-widest: 0.26em;
+
+  /* motion — durations (beats.md §2.2) */
+  --fr-duration-stagger: 40ms;
+  --fr-duration-micro: 80ms;
+  --fr-duration-quick: 150ms;
+  --fr-duration-fast: 250ms;
+  --fr-duration-medium: 350ms;
+  --fr-duration-slow: 400ms;
+  --fr-duration-very-slow: 500ms;
+
+  /* motion — easings (beats.md §2.2) */
+  --fr-ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --fr-ease-in-out: ease-in-out;
+  --fr-ease-bounce: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --fr-ease-out: ease-out;
+
+  /* motion — blur */
+  --fr-blur-none: 0px;
+  --fr-blur-small: 2px;
+  --fr-blur-medium: 3px;
+
+  /* z layers */
+  --fr-z-felt: 0;
+  --fr-z-board: 10;
+  --fr-z-bet: 20;
+  --fr-z-seat: 30;
+  --fr-z-pot: 40;
+  --fr-z-marker: 50;
+  --fr-z-overlay: 60;
+  --fr-z-rail: 70;
+  --fr-z-header: 80;
+  --fr-z-sheet: 90;
+  --fr-z-toast: 100;
+  --fr-z-tooltip: 110;
+
+  /* semantic — default skin: afterhours */
+  --fr-canvas: #0a0b0e;
+  --fr-surface: #121016;
+  --fr-edge: #1d1f27;
+  --fr-text: #e6e4ee;
+  --fr-muted: #918e9f;
+  --fr-dim: #5c5966;
+  --fr-accent-a: #ffb98a;
+  --fr-accent-b: #ff9ec4;
+  --fr-glow: #ffb98a;
+  --fr-felt1: #3a2333;
+  --fr-felt2: #1d1220;
+  --fr-rail: #241522;
+  --fr-plate: #16121a;
+  --fr-cardface: #fbfaf7;
+  --fr-suit-s: #16181d;
+  --fr-suit-h: #d0453a;
+  --fr-suit-d: #2e6fd8;
+  --fr-suit-c: #1f9d63;
+  --fr-pos: #7fe0b0;
+  --fr-neg: #f0908c;
+  --fr-off-record: #9aa2b6;
+}
+
+[data-skin="afterhours"] {
+  /* skin: afterhours */
+  --fr-canvas: #0a0b0e;
+  --fr-surface: #121016;
+  --fr-edge: #1d1f27;
+  --fr-text: #e6e4ee;
+  --fr-muted: #918e9f;
+  --fr-dim: #5c5966;
+  --fr-accent-a: #ffb98a;
+  --fr-accent-b: #ff9ec4;
+  --fr-glow: #ffb98a;
+  --fr-felt1: #3a2333;
+  --fr-felt2: #1d1220;
+  --fr-rail: #241522;
+  --fr-plate: #16121a;
+  --fr-cardface: #fbfaf7;
+  --fr-suit-s: #16181d;
+  --fr-suit-h: #d0453a;
+  --fr-suit-d: #2e6fd8;
+  --fr-suit-c: #1f9d63;
+  --fr-pos: #7fe0b0;
+  --fr-neg: #f0908c;
+  --fr-off-record: #9aa2b6;
+}
+
+[data-skin="midnight"] {
+  /* skin: midnight */
+  --fr-canvas: #0a0b0e;
+  --fr-surface: #121016;
+  --fr-edge: #1d1f27;
+  --fr-text: #e6e4ee;
+  --fr-muted: #918e9f;
+  --fr-dim: #5c5966;
+  --fr-accent-a: #7fe0c3;
+  --fr-accent-b: #c9b8ff;
+  --fr-glow: #7fe0c3;
+  --fr-felt1: #1a3a2f;
+  --fr-felt2: #0e211a;
+  --fr-rail: #14261f;
+  --fr-plate: #101a16;
+  --fr-cardface: #fbfaf7;
+  --fr-suit-s: #16181d;
+  --fr-suit-h: #d0453a;
+  --fr-suit-d: #2e6fd8;
+  --fr-suit-c: #1f9d63;
+  --fr-pos: #7fe0b0;
+  --fr-neg: #f0908c;
+  --fr-off-record: #9aa2b6;
+}
+
+[data-skin="cardroom"] {
+  /* skin: cardroom */
+  --fr-canvas: #0a0b0e;
+  --fr-surface: #121016;
+  --fr-edge: #1d1f27;
+  --fr-text: #e6e4ee;
+  --fr-muted: #918e9f;
+  --fr-dim: #5c5966;
+  --fr-accent-a: #e8c87a;
+  --fr-accent-b: #8fb89a;
+  --fr-glow: #e8c87a;
+  --fr-felt1: #2e5c48;
+  --fr-felt2: #163024;
+  --fr-rail: #1d3a2c;
+  --fr-plate: #12201a;
+  --fr-cardface: #fbfaf7;
+  --fr-suit-s: #16181d;
+  --fr-suit-h: #d0453a;
+  --fr-suit-d: #2e6fd8;
+  --fr-suit-c: #1f9d63;
+  --fr-pos: #7fe0b0;
+  --fr-neg: #f0908c;
+  --fr-off-record: #9aa2b6;
+}

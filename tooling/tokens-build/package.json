@@ -1,0 +1,8 @@
+{
+  "name": "@poker/tokens-build",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node --import tsx ./build.ts"
+  }
+}

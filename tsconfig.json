@@ -3,6 +3,12 @@
   "compilerOptions": {
     "types": ["node"]
   },
-  "include": ["packages/*/src/**/*.ts", "packages/*/test/**/*.ts", "packages/*/bench/**/*.ts", "tools/**/*.ts"],
+  "include": [
+    "packages/*/src/**/*.ts",
+    "packages/*/test/**/*.ts",
+    "packages/*/bench/**/*.ts",
+    "tools/**/*.ts",
+    "tooling/*/*.ts"
+  ],
   "exclude": ["node_modules", "apps"]
 }
