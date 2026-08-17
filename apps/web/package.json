@@ -8,18 +8,32 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@poker/analysis": "workspace:*",
+    "@poker/bots": "workspace:*",
     "@poker/core": "workspace:*",
     "@poker/engine": "workspace:*",
+    "@poker/equity": "workspace:*",
     "@poker/eval": "workspace:*",
     "@poker/history": "workspace:*",
+    "@poker/ranges": "workspace:*",
     "@poker/rng": "workspace:*",
+    "@poker/table-ui": "workspace:*",
+    "@poker/ui": "workspace:*",
+    "@poker/workers": "workspace:*",
+    "@tanstack/react-router": "^1.95.0",
+    "dexie": "^4.0.10",
+    "motion": "^11.15.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
     "vite": "^6.0.0"
   }
 }

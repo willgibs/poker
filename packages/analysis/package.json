@@ -1,0 +1,15 @@
+{
+  "name": "@poker/analysis",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": {
+    "@poker/charts": "workspace:*",
+    "@poker/core": "workspace:*",
+    "@poker/equity": "workspace:*",
+    "@poker/eval": "workspace:*",
+    "@poker/history": "workspace:*",
+    "@poker/ranges": "workspace:*",
+    "@poker/rng": "workspace:*"
+  }
+}

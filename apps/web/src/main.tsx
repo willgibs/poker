@@ -1,11 +1,20 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { App } from "./App";
+import { RouterProvider } from "@tanstack/react-router";
 
-const root = document.getElementById("root");
-if (!root) throw new Error("missing #root");
-createRoot(root).render(
+import "@poker/ui/tokens.css";
+import "@poker/ui/components.css";
+import "./app.css";
+
+import { createAppRouter } from "./router";
+
+const router = createAppRouter();
+
+const rootEl = document.getElementById("root");
+if (!rootEl) throw new Error("missing #root");
+
+createRoot(rootEl).render(
   <StrictMode>
-    <App />
+    <RouterProvider router={router} />
   </StrictMode>,
 );

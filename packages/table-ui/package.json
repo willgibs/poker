@@ -2,8 +2,26 @@
   "name": "@poker/table-ui",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts",
+    "./hero.css": "./src/hero/hero.css",
+    "./components.css": "./src/components/components.css"
+  },
   "dependencies": {
-    "@poker/history": "workspace:*"
+    "@poker/core": "workspace:*",
+    "@poker/engine": "workspace:*",
+    "@poker/history": "workspace:*",
+    "@poker/ui": "workspace:*",
+    "motion": "^11.15.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "jsdom": "^25.0.1",
+    "react-dom": "^19.0.0"
   }
 }

@@ -1,22 +1,35 @@
-.app-shell {
-  min-height: 100dvh;
-  display: grid;
-  place-items: center;
+/*
+ * Global reset + base type. Everything below this is component-scoped CSS
+ * co-located with the component that owns it — this file only sets up the
+ * page itself.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
   background: var(--fr-canvas);
   color: var(--fr-text);
-  font-family: var(--fr-font-display, system-ui, sans-serif);
+  font-family: var(--fr-font-body);
+  font-size: var(--fr-font-size-body-md);
+  line-height: var(--fr-line-height-normal);
+  -webkit-font-smoothing: antialiased;
 }
 
-.app-shell__inner {
-  text-align: center;
+#root {
+  min-height: 100dvh;
 }
 
-.app-shell__title {
-  font-size: 40px;
-  margin: 0;
-  letter-spacing: -0.01em;
-}
-
-.app-shell__subtitle {
-  color: var(--fr-dim);
+:focus-visible {
+  outline: 2px solid var(--fr-glow);
+  outline-offset: 2px;
 }

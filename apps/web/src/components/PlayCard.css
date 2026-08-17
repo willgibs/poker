@@ -1,0 +1,62 @@
+.play-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fr-space-2);
+  padding: var(--fr-space-5);
+  min-height: 200px;
+  border-radius: var(--fr-radius-xl);
+  border: 1px solid color-mix(in srgb, var(--fr-glow) 13%, transparent);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--fr-glow) 6%, transparent),
+    color-mix(in srgb, var(--fr-accent-b) 4%, transparent) 55%,
+    transparent
+  );
+}
+
+.play-card[data-tone="primary"] {
+  border-color: color-mix(in srgb, var(--fr-glow) 30%, transparent);
+  background:
+    linear-gradient(
+      150deg,
+      color-mix(in srgb, var(--fr-glow) 22%, transparent),
+      color-mix(in srgb, var(--fr-accent-b) 14%, transparent) 55%
+    ),
+    var(--fr-felt2);
+}
+
+.play-card__kicker {
+  margin: 0;
+  font-size: var(--fr-font-size-label-md);
+  font-weight: var(--fr-font-weight-bold);
+  letter-spacing: var(--fr-letter-spacing-wider);
+  text-transform: uppercase;
+  color: var(--fr-glow);
+}
+
+.play-card[data-tone="primary"] .play-card__kicker {
+  color: var(--fr-ink-1000);
+  opacity: 0.85;
+}
+
+.play-card__body {
+  margin: 0;
+  flex: 1;
+  font-size: var(--fr-font-size-body-sm);
+  color: var(--fr-muted);
+}
+
+.play-card[data-tone="primary"] .play-card__body {
+  color: color-mix(in srgb, var(--fr-ink-1000) 78%, transparent);
+}
+
+.play-card__stakes {
+  font-size: var(--fr-font-size-body-sm);
+  color: var(--fr-ink-1000);
+}
+
+.play-card__footer {
+  margin-top: auto;
+  padding-top: var(--fr-space-2);
+}

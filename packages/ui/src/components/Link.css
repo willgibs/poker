@@ -1,0 +1,47 @@
+/*
+ * `Link` — see Link.tsx. Imported directly by the component (not part of the
+ * shared `components.css`), token-only paint per the same rules that sheet is
+ * guarded by.
+ */
+
+.fr-link {
+  color: var(--fr-muted);
+  font-family: var(--fr-font-body);
+  text-decoration: none;
+  transition: color var(--fr-duration-quick) var(--fr-ease-smooth-out);
+}
+
+.fr-link:hover {
+  color: var(--fr-text);
+}
+
+.fr-link:focus-visible {
+  outline: 2px solid var(--fr-glow);
+  outline-offset: 2px;
+  border-radius: var(--fr-radius-xs);
+}
+
+/* The skip-to-content link: off-screen until it receives keyboard focus. */
+.fr-link--skip {
+  position: fixed;
+  top: var(--fr-space-2);
+  left: var(--fr-space-2);
+  z-index: var(--fr-z-toast);
+  padding: var(--fr-space-2) var(--fr-space-4);
+  border: 1px solid var(--fr-edge);
+  border-radius: var(--fr-radius-md);
+  background-color: var(--fr-surface);
+  color: var(--fr-text);
+  transform: translateY(-150%);
+  transition: transform var(--fr-duration-quick) var(--fr-ease-smooth-out);
+}
+
+.fr-link--skip:focus-visible {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fr-link--skip {
+    transition-duration: var(--fr-duration-micro);
+  }
+}

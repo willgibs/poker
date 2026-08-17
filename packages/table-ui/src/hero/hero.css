@@ -1,0 +1,339 @@
+/*
+ * The hero zone — table.html Study 3.
+ *
+ *   import "@poker/ui/tokens.css";
+ *   import "@poker/ui/components.css";
+ *   import "@poker/table-ui/hero.css";
+ *
+ * Same rules as the atom sheet, guarded by
+ * `packages/ui/src/components/components.css.test.ts`: every colour is a
+ * `var(--fr-*)` lookup, every duration and easing is a token, no layout
+ * property is ever transitioned, and reduced motion is honoured.
+ *
+ * Alpha is expressed as `color-mix(in srgb, var(--fr-token) N%, transparent)`
+ * — derived from the token, so a skin swap carries the translucency with it.
+ */
+
+/* -------------------------------------------------------------------------- */
+/* The bar                                                                    */
+/* -------------------------------------------------------------------------- */
+
+.fr-hero {
+  --fr-hero-row-h: var(--fr-space-12);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fr-space-3);
+  box-sizing: border-box;
+  max-width: var(--fr-hero-max-w, none);
+  padding: var(--fr-space-4) var(--fr-space-4) var(--fr-space-3);
+  border: 1px solid color-mix(in srgb, var(--fr-text) 6%, transparent);
+  border-radius: var(--fr-radius-xl);
+  background-image: linear-gradient(180deg, var(--fr-surface), var(--fr-canvas));
+  z-index: var(--fr-z-rail);
+}
+
+/* The zone is a focus container, not a focusable control: no ring of its own. */
+.fr-hero:focus {
+  outline: none;
+}
+
+.fr-hero[data-disabled] {
+  opacity: 0.62;
+}
+
+/*
+ * The expand-in-place mechanic. Both rows live in the same grid cell, so the
+ * bar's height is the taller of the two and switching between them cannot move
+ * the top edge — or anything above it.
+ */
+.fr-hero__stack {
+  display: grid;
+  grid-template-areas: "rows";
+  align-items: center;
+  min-height: var(--fr-hero-row-h);
+}
+
+.fr-hero__row {
+  grid-area: rows;
+  display: flex;
+  align-items: center;
+  gap: var(--fr-space-3);
+  flex-wrap: wrap;
+}
+
+/* The faded-out row must not be a pointer or tab target. */
+.fr-hero__row--resting {
+  pointer-events: auto;
+}
+
+.fr-hero[data-expanded] .fr-hero__row--resting {
+  pointer-events: none;
+}
+
+.fr-hero__row--sizing {
+  pointer-events: none;
+}
+
+.fr-hero[data-expanded] .fr-hero__row--sizing {
+  pointer-events: auto;
+}
+
+.fr-hero__cards {
+  display: flex;
+  align-items: center;
+  gap: var(--fr-space-3);
+  margin-right: auto;
+}
+
+/* -------------------------------------------------------------------------- */
+/* The three action controls                                                  */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Placement only. `Button` owns its own paint (`@poker/ui`'s components.css); the
+ * hero zone sets the target size the felt needs — a 50px-class control, per
+ * Study 3A — and the widths that make one of them obviously the loud one.
+ */
+.fr-hero__btn {
+  position: relative;
+  display: inline-flex;
+}
+
+.fr-hero__btn > .fr-btn {
+  height: var(--fr-hero-row-h);
+  border-radius: var(--fr-radius-lg);
+  font-size: var(--fr-font-size-body-md);
+}
+
+.fr-hero__btn--fold > .fr-btn {
+  min-width: var(--fr-space-20);
+}
+
+.fr-hero__btn--passive > .fr-btn {
+  min-width: var(--fr-space-24);
+  border-color: color-mix(in srgb, var(--fr-text) 9%, transparent);
+  background-color: color-mix(in srgb, var(--fr-text) 4%, transparent);
+  color: var(--fr-text);
+}
+
+.fr-hero__btn--aggro > .fr-btn {
+  min-width: calc(var(--fr-space-24) + var(--fr-space-16));
+}
+
+.fr-hero__back > .fr-btn {
+  min-width: var(--fr-space-10);
+  padding-inline: var(--fr-space-2);
+  font-size: var(--fr-font-size-display-sm);
+  color: var(--fr-dim);
+}
+
+.fr-hero__amount {
+  margin-left: auto;
+}
+
+/* -------------------------------------------------------------------------- */
+/* The slider row                                                             */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * The only part of the bar that really opens, and it opens downward — the rows
+ * above it never move. Its height is animated by motion, not by CSS, which is
+ * why there is no transition on this rule.
+ */
+.fr-hero__sliderrow {
+  display: flex;
+  align-items: center;
+  gap: var(--fr-space-4);
+  overflow: hidden;
+}
+
+.fr-hero__slider {
+  flex: 1 1 auto;
+}
+
+.fr-hero__commit {
+  flex: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* The strip: one coach line, one price chip                                  */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Both hold their exact positions across every bar state — that fixed geometry
+ * is what lets the player stop looking for them. L1's whole budget, one row.
+ */
+.fr-hero__strip {
+  display: flex;
+  align-items: center;
+  gap: var(--fr-space-3);
+  min-height: var(--fr-space-6);
+}
+
+.fr-hero__coachgap {
+  flex: 1 1 auto;
+}
+
+.fr-coach {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--fr-space-2);
+  min-width: 0;
+  font-family: var(--fr-font-body);
+  font-size: var(--fr-font-size-body-sm);
+  line-height: var(--fr-line-height-snug);
+  color: var(--fr-muted);
+}
+
+/* The coach's own mark — the same gradient dot the rail hint uses. */
+.fr-coach:not([data-empty])::before {
+  content: "";
+  flex: none;
+  width: var(--fr-space-2);
+  height: var(--fr-space-2);
+  border-radius: var(--fr-radius-circle);
+  background-image: linear-gradient(135deg, var(--fr-accent-a), var(--fr-accent-b));
+}
+
+.fr-coach__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fr-price {
+  margin-left: auto;
+  flex: none;
+}
+
+.fr-price__mark {
+  width: var(--fr-space-2);
+  height: var(--fr-space-2);
+  border-radius: var(--fr-radius-xs);
+  transform: rotate(45deg);
+  background-image: linear-gradient(135deg, var(--fr-accent-a), var(--fr-accent-b));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Hero cards                                                                 */
+/* -------------------------------------------------------------------------- */
+
+.fr-herocards {
+  display: inline-flex;
+  align-items: flex-end;
+}
+
+/* Held, not laid out: a slight fan and an overlap, like a real hand. */
+.fr-herocards__card:first-child {
+  transform: rotate(-5deg);
+}
+
+.fr-herocards__card:last-child {
+  transform: rotate(5deg);
+  margin-left: calc(-1 * var(--fr-space-2));
+}
+
+/* -------------------------------------------------------------------------- */
+/* The keyboard map (hold ?)                                                  */
+/* -------------------------------------------------------------------------- */
+
+.fr-keymap {
+  position: absolute;
+  inset-inline: var(--fr-space-4);
+  bottom: calc(100% + var(--fr-space-2));
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fr-space-3);
+  padding: var(--fr-space-3) var(--fr-space-4);
+  border: 1px solid color-mix(in srgb, var(--fr-text) 9%, transparent);
+  border-radius: var(--fr-radius-lg);
+  background-color: var(--fr-surface);
+  z-index: var(--fr-z-tooltip);
+
+  font-family: var(--fr-font-body);
+  font-size: var(--fr-font-size-body-xs);
+  color: var(--fr-muted);
+}
+
+.fr-keymap__row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fr-space-1);
+}
+
+.fr-keymap__what {
+  margin-left: var(--fr-space-1);
+}
+
+/* -------------------------------------------------------------------------- */
+/* The header — four slots                                                    */
+/* -------------------------------------------------------------------------- */
+
+.fr-hdr {
+  display: flex;
+  align-items: center;
+  gap: var(--fr-space-4);
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--fr-space-2) var(--fr-space-4);
+  border-bottom: 1px solid color-mix(in srgb, var(--fr-text) 6%, transparent);
+  z-index: var(--fr-z-header);
+
+  font-family: var(--fr-font-body);
+  font-size: var(--fr-font-size-body-sm);
+  color: var(--fr-muted);
+}
+
+.fr-hdr__slot {
+  display: flex;
+  align-items: center;
+  gap: var(--fr-space-2);
+}
+
+/* Slot 3 takes the slack, so slots 2 and 4 stay pinned where muscle memory left them. */
+.fr-hdr__slot--contextual {
+  flex: 1 1 auto;
+  justify-content: flex-end;
+}
+
+.fr-hdr__stakes {
+  color: var(--fr-text);
+  font-weight: var(--fr-font-weight-semibold);
+}
+
+.fr-hdr__sep {
+  color: var(--fr-dim);
+}
+
+.fr-hdr__net[data-sign="pos"] .fr-btn {
+  color: var(--fr-pos);
+}
+
+.fr-hdr__net[data-sign="neg"] .fr-btn {
+  color: var(--fr-neg);
+}
+
+.fr-hdr__hands {
+  color: var(--fr-dim);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Reduce motion                                                              */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * beats.md §5.4: fades in place, nothing travels. The components already swap
+ * their motion variants off `useReducedMotion`; this block covers the CSS-side
+ * transforms that are decoration rather than information — the card fan reads
+ * the same flat, and the price chip's diamond does not need to be rotated.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .fr-herocards__card:first-child,
+  .fr-herocards__card:last-child {
+    transform: none;
+  }
+}

@@ -1,0 +1,22 @@
+.app-shell {
+  display: grid;
+  grid-template-columns: 216px 1fr;
+  min-height: 100dvh;
+  background: var(--fr-canvas);
+  color: var(--fr-text);
+}
+
+.app-shell__main {
+  min-width: 0;
+  overflow: auto;
+}
+
+.app-shell__main:focus-visible {
+  outline: none;
+}
+
+@media (max-width: 860px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+}

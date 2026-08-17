@@ -1,0 +1,57 @@
+/*
+ * `NavLink` — see NavLink.tsx. Imported directly by the component (not part
+ * of the shared `components.css`), token-only paint per the same rules that
+ * sheet is guarded by.
+ */
+
+.fr-nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--fr-space-3);
+  box-sizing: border-box;
+  padding: var(--fr-space-2) var(--fr-space-3);
+  border-radius: var(--fr-radius-md);
+  color: var(--fr-muted);
+  font-family: var(--fr-font-body);
+  font-weight: var(--fr-font-weight-medium);
+  font-size: var(--fr-font-size-body-sm);
+  text-decoration: none;
+  transition:
+    color var(--fr-duration-quick) var(--fr-ease-smooth-out),
+    background-color var(--fr-duration-quick) var(--fr-ease-smooth-out);
+}
+
+.fr-nav-link:hover {
+  color: var(--fr-text);
+  background-color: color-mix(in srgb, var(--fr-glow) 6%, transparent);
+}
+
+.fr-nav-link:focus-visible {
+  outline: 2px solid var(--fr-glow);
+  outline-offset: 2px;
+}
+
+.fr-nav-link[data-active="true"] {
+  color: var(--fr-ink-1000);
+  background-color: color-mix(in srgb, var(--fr-glow) 10%, transparent);
+}
+
+.fr-nav-link__icon {
+  display: inline-flex;
+  flex: none;
+  opacity: 0.85;
+}
+
+.fr-nav-link[data-active="true"] .fr-nav-link__icon {
+  opacity: 1;
+}
+
+.fr-nav-link__label {
+  flex: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fr-nav-link {
+    transition-duration: var(--fr-duration-micro);
+  }
+}

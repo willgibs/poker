@@ -1,0 +1,447 @@
+/*
+ * @poker/ui — system component styles.
+ *
+ * Import once, next to the tokens:
+ *
+ *   import "@poker/ui/tokens.css";
+ *   import "@poker/ui/components.css";
+ *
+ * Rules of this file (guarded by components.css.test.ts):
+ *   1. Every colour is a `var(--fr-*)` lookup, or a `color-mix()` of one with
+ *      `transparent` / `currentColor`. No hex, no rgb(), no hsl(), ever.
+ *   2. Every duration and easing is a `var(--fr-duration-*)` / `var(--fr-ease-*)`.
+ *   3. Every animated property is transform or opacity (beats.md law #4).
+ *   4. Every interactive element has a `:focus-visible` treatment.
+ *
+ * Alpha: the token layer is opaque by design, so translucency is expressed as
+ * `color-mix(in srgb, var(--fr-token) N%, transparent)` — derived from a token
+ * rather than a second hand-tuned colour that a skin swap would strand.
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Numerals                                                                   */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Every visible chip amount wears this (see formatCents.ts). Tabular figures
+ * mean a rolling counter never re-flows the row it sits in.
+ */
+.fr-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Button                                                                     */
+/* -------------------------------------------------------------------------- */
+
+.fr-btn {
+  --fr-btn-h: calc(var(--fr-space-10) + var(--fr-space-1)); /* 44px */
+  --fr-btn-pad: var(--fr-space-5);
+  --fr-btn-radius: var(--fr-radius-md);
+  --fr-btn-font: var(--fr-font-size-body-md);
+
+  position: relative;
+  display: inline-grid;
+  grid-auto-flow: column;
+  place-items: center;
+  gap: var(--fr-space-2);
+
+  box-sizing: border-box;
+  min-width: var(--fr-btn-h);
+  height: var(--fr-btn-h);
+  padding: 0 var(--fr-btn-pad);
+  border: 1px solid transparent;
+  border-radius: var(--fr-btn-radius);
+
+  font-family: var(--fr-font-body);
+  font-size: var(--fr-btn-font);
+  font-weight: var(--fr-font-weight-semibold);
+  line-height: var(--fr-line-height-snug);
+  letter-spacing: var(--fr-letter-spacing-snug);
+
+  background: transparent;
+  color: var(--fr-text);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  /* Colour only — the press scale is owned by motion, not by CSS. */
+  transition:
+    background-color var(--fr-duration-quick) var(--fr-ease-smooth-out),
+    border-color var(--fr-duration-quick) var(--fr-ease-smooth-out),
+    color var(--fr-duration-quick) var(--fr-ease-smooth-out),
+    opacity var(--fr-duration-quick) var(--fr-ease-smooth-out);
+}
+
+.fr-btn__label {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* The key cap rides the corner, clear of the label. */
+.fr-btn__hint {
+  position: absolute;
+  right: var(--fr-space-2);
+  bottom: var(--fr-space-1);
+  pointer-events: none;
+}
+
+.fr-btn--sm {
+  --fr-btn-h: calc(var(--fr-space-8) + var(--fr-space-1)); /* 36px */
+  --fr-btn-pad: var(--fr-space-3);
+  --fr-btn-radius: var(--fr-radius-sm);
+  --fr-btn-font: var(--fr-font-size-body-sm);
+}
+
+/*
+ * The felt-sized control. Study 3A draws it at 50px; 48px is the nearest step
+ * on the 4-based space scale and the scale wins — a one-off 50px token would be
+ * the first crack in it.
+ */
+.fr-btn--lg {
+  --fr-btn-h: var(--fr-space-12); /* 48px */
+  --fr-btn-pad: var(--fr-space-6);
+  --fr-btn-radius: var(--fr-radius-lg);
+  --fr-btn-font: var(--fr-font-size-body-lg);
+}
+
+/* primary — the one gradient. Exactly one may be live per screen. */
+.fr-btn--primary {
+  background-image: linear-gradient(135deg, var(--fr-accent-a), var(--fr-accent-b));
+  color: var(--fr-canvas);
+  border-color: transparent;
+  box-shadow: 0 6px 26px color-mix(in srgb, var(--fr-accent-b) 17%, transparent);
+}
+
+.fr-btn--primary:hover:not(:disabled) {
+  box-shadow: 0 6px 30px color-mix(in srgb, var(--fr-accent-b) 28%, transparent);
+}
+
+/* ghost — outlined, recessive. The safe action. */
+.fr-btn--ghost {
+  border-color: color-mix(in srgb, var(--fr-text) 9%, transparent);
+  color: var(--fr-muted);
+  font-weight: var(--fr-font-weight-medium);
+}
+
+.fr-btn--ghost:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--fr-text) 18%, transparent);
+  color: var(--fr-text);
+}
+
+/* quiet — text until touched. */
+.fr-btn--quiet {
+  color: var(--fr-muted);
+  font-weight: var(--fr-font-weight-medium);
+}
+
+.fr-btn--quiet:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--fr-text) 6%, transparent);
+  color: var(--fr-text);
+}
+
+.fr-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Focus — one ring for every control in the system                           */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * `:focus-visible` only: a pointer press must never leave a ring behind, and a
+ * keyboard tab must always land one. Both an outline and a soft halo, because
+ * the halo alone disappears under forced-colors.
+ */
+.fr-btn:focus-visible,
+.fr-sizechip:focus-visible,
+.fr-slider:focus-visible,
+.fr-amount__input:focus-visible {
+  outline: 2px solid var(--fr-glow);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--fr-glow) 18%, transparent);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Pill                                                                       */
+/* -------------------------------------------------------------------------- */
+
+.fr-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fr-space-2);
+  box-sizing: border-box;
+  padding: var(--fr-space-1) var(--fr-space-3);
+  border: 1px solid color-mix(in srgb, var(--fr-text) 9%, transparent);
+  border-radius: var(--fr-radius-pill);
+  background-color: color-mix(in srgb, var(--fr-surface) 80%, transparent);
+
+  font-family: var(--fr-font-body);
+  font-size: var(--fr-font-size-label-md);
+  font-weight: var(--fr-font-weight-medium);
+  line-height: var(--fr-line-height-snug);
+  letter-spacing: var(--fr-letter-spacing-normal);
+  white-space: nowrap;
+  color: var(--fr-muted);
+}
+
+.fr-pill__leading {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+}
+
+.fr-pill--accent {
+  color: var(--fr-accent-a);
+  border-color: color-mix(in srgb, var(--fr-accent-a) 24%, transparent);
+}
+
+.fr-pill--pos {
+  color: var(--fr-pos);
+  border-color: color-mix(in srgb, var(--fr-pos) 24%, transparent);
+}
+
+.fr-pill--neg {
+  color: var(--fr-neg);
+  border-color: color-mix(in srgb, var(--fr-neg) 24%, transparent);
+}
+
+.fr-pill--off-record {
+  color: var(--fr-off-record);
+  border-color: color-mix(in srgb, var(--fr-off-record) 24%, transparent);
+}
+
+/* -------------------------------------------------------------------------- */
+/* SizeChip                                                                   */
+/* -------------------------------------------------------------------------- */
+
+.fr-sizechip {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  padding: var(--fr-space-2) var(--fr-space-3);
+  border: 1px solid color-mix(in srgb, var(--fr-text) 9%, transparent);
+  border-radius: var(--fr-radius-md);
+  background-color: color-mix(in srgb, var(--fr-text) 4%, transparent);
+
+  font-family: var(--fr-font-body);
+  font-size: var(--fr-font-size-body-sm);
+  font-weight: var(--fr-font-weight-semibold);
+  line-height: var(--fr-line-height-snug);
+  color: var(--fr-text);
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    background-color var(--fr-duration-quick) var(--fr-ease-smooth-out),
+    border-color var(--fr-duration-quick) var(--fr-ease-smooth-out),
+    color var(--fr-duration-quick) var(--fr-ease-smooth-out);
+}
+
+.fr-sizechip__sub {
+  font-size: var(--fr-font-size-label-sm);
+  font-weight: var(--fr-font-weight-medium);
+  letter-spacing: var(--fr-letter-spacing-normal);
+  text-transform: none;
+  color: var(--fr-dim);
+}
+
+.fr-sizechip__hint {
+  position: absolute;
+  top: calc(-1 * var(--fr-space-2));
+  right: calc(-1 * var(--fr-space-2));
+  pointer-events: none;
+}
+
+/* The floating "suggested" tag — a notch cut into the chip's top edge. */
+.fr-sizechip__tag {
+  position: absolute;
+  top: calc(-1 * var(--fr-space-2));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 var(--fr-space-2);
+  border-radius: var(--fr-radius-pill);
+  background-color: var(--fr-canvas);
+
+  font-size: var(--fr-font-size-label-sm);
+  font-weight: var(--fr-font-weight-bold);
+  letter-spacing: var(--fr-letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--fr-accent-a);
+  white-space: nowrap;
+}
+
+.fr-sizechip:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--fr-text) 18%, transparent);
+}
+
+.fr-sizechip--on {
+  background-image: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--fr-accent-a) 12%, transparent),
+    color-mix(in srgb, var(--fr-accent-b) 12%, transparent)
+  );
+  border-color: color-mix(in srgb, var(--fr-accent-a) 40%, transparent);
+  color: var(--fr-accent-a);
+}
+
+.fr-sizechip--on .fr-sizechip__sub {
+  color: color-mix(in srgb, var(--fr-accent-a) 78%, var(--fr-muted));
+}
+
+.fr-sizechip:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Kbd                                                                        */
+/* -------------------------------------------------------------------------- */
+
+.fr-kbd {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  min-width: var(--fr-space-5);
+  height: var(--fr-space-5);
+  padding: 0 var(--fr-space-1);
+  border: 1px solid color-mix(in srgb, var(--fr-text) 14%, transparent);
+  border-bottom-width: 2px;
+  border-radius: var(--fr-radius-xs);
+  background-color: color-mix(in srgb, var(--fr-text) 8%, var(--fr-surface));
+
+  font-family: var(--fr-font-body);
+  font-size: var(--fr-font-size-label-sm);
+  font-weight: var(--fr-font-weight-semibold);
+  line-height: 1;
+  color: var(--fr-muted);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Slider                                                                     */
+/* -------------------------------------------------------------------------- */
+
+.fr-slider {
+  --fr-slider-track: var(--fr-space-2);
+  --fr-slider-knob: calc(var(--fr-space-4) + var(--fr-space-1)); /* 20px */
+
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  min-width: var(--fr-space-24);
+  height: var(--fr-slider-knob);
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+/*
+ * The fill is painted into the track as a hard-stop gradient at `--fr-fill`,
+ * which the component writes from its own value. No layout animates.
+ */
+.fr-slider::-webkit-slider-runnable-track {
+  height: var(--fr-slider-track);
+  border-radius: var(--fr-radius-pill);
+  background-color: color-mix(in srgb, var(--fr-text) 10%, transparent);
+  background-image: linear-gradient(90deg, var(--fr-accent-a), var(--fr-accent-b));
+  background-repeat: no-repeat;
+  background-size: calc(var(--fr-fill, 0) * 100%) 100%;
+}
+
+.fr-slider::-moz-range-track {
+  height: var(--fr-slider-track);
+  border-radius: var(--fr-radius-pill);
+  background-color: color-mix(in srgb, var(--fr-text) 10%, transparent);
+}
+
+.fr-slider::-moz-range-progress {
+  height: var(--fr-slider-track);
+  border-radius: var(--fr-radius-pill);
+  background-image: linear-gradient(90deg, var(--fr-accent-a), var(--fr-accent-b));
+}
+
+.fr-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--fr-slider-knob);
+  height: var(--fr-slider-knob);
+  margin-top: calc((var(--fr-slider-track) - var(--fr-slider-knob)) / 2);
+  border: none;
+  border-radius: var(--fr-radius-circle);
+  background-color: var(--fr-cardface);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--fr-canvas) 60%, transparent);
+}
+
+.fr-slider::-moz-range-thumb {
+  width: var(--fr-slider-knob);
+  height: var(--fr-slider-knob);
+  border: none;
+  border-radius: var(--fr-radius-circle);
+  background-color: var(--fr-cardface);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--fr-canvas) 60%, transparent);
+}
+
+.fr-slider:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+/* -------------------------------------------------------------------------- */
+/* AmountField                                                                */
+/* -------------------------------------------------------------------------- */
+
+.fr-amount {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fr-space-1);
+  box-sizing: border-box;
+  padding: var(--fr-space-2) var(--fr-space-3);
+  border: 1px solid color-mix(in srgb, var(--fr-text) 9%, transparent);
+  border-radius: var(--fr-radius-md);
+  background-color: color-mix(in srgb, var(--fr-canvas) 70%, var(--fr-surface));
+}
+
+.fr-amount__prefix {
+  font-family: var(--fr-font-body);
+  font-size: var(--fr-font-size-body-md);
+  font-weight: var(--fr-font-weight-semibold);
+  color: var(--fr-dim);
+}
+
+.fr-amount__input {
+  width: var(--fr-space-20);
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+
+  font-family: var(--fr-font-body);
+  font-size: var(--fr-font-size-body-md);
+  font-weight: var(--fr-font-weight-semibold);
+  color: var(--fr-text);
+}
+
+.fr-amount:focus-within {
+  border-color: color-mix(in srgb, var(--fr-glow) 45%, transparent);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Reduce motion                                                              */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * beats.md §5.4: fades in place, nothing travels. The press-scale is a motion
+ * spring, not a CSS transition, and is deliberately kept (§4.15) — this block
+ * only collapses the colour transitions above so nothing lingers.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .fr-btn,
+  .fr-sizechip {
+    transition-duration: var(--fr-duration-micro);
+  }
+}

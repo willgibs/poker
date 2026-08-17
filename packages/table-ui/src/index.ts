@@ -70,3 +70,78 @@ export { CALL_TRIM_DB, CUE_DEDUPE_MS, INSTANT_CUES, applySoundPolicy, chipCue, c
 
 export type { BeatAnchor, BeatEvent, BeatPhase, Presenter, PresenterConfig } from "./presenter";
 export { createPresenter } from "./presenter";
+
+/* ==== BEGIN components — the table's presentational kit (React) ==== */
+/* The Presenter above is headless; everything below renders it. Styles:
+   `import "@poker/table-ui/components.css"` alongside `@poker/ui/tokens.css`. */
+export {
+  BOARD_SLOTS,
+  BetChips,
+  Board,
+  CARD_RANKS,
+  CARD_SUITS,
+  DealerButton,
+  EmptySlot,
+  Felt,
+  PlayingCard,
+  PotDisplay,
+  SeatPlate,
+  boardCardEntrance,
+  cardLabel,
+  readCard,
+} from "./components";
+export type {
+  BetChipsProps,
+  BoardProps,
+  CardCode,
+  CardRank,
+  CardSize,
+  CardSuit,
+  DealerButtonProps,
+  EmptySlotProps,
+  Entrance,
+  EntranceTransition,
+  FeltProps,
+  PlayingCardProps,
+  PotDisplayProps,
+  ReadCard,
+  SeatPlateProps,
+  TableDensity,
+} from "./components";
+/* ==== END components ==== */
+
+/* ==== BEGIN hero — the zone between the felt and the player (React) ==== */
+/* Action bar + its fixed strip (one coach line, one price chip), the two hole
+   cards, and the four-slot table header. Styles:
+   `import "@poker/table-ui/hero.css"`. */
+export {
+  ActionBar,
+  CoachLine,
+  HEADER_SLOTS,
+  HEADER_SLOT_BUDGET,
+  HeroCards,
+  KEY_MAP,
+  KeyMapOverlay,
+  PriceChip,
+  TableHeader,
+  aggressionBounds,
+  aggressionLabel,
+  commitLabel,
+  formatNeed,
+  formatRatio,
+  passiveLabel,
+  priceLabel,
+} from "./hero";
+export type {
+  ActionBarProps,
+  CoachLineProps,
+  HeaderSlot,
+  HeroCardsProps,
+  KeyMapOverlayProps,
+  NetUnit,
+  PriceChipProps,
+  PriceState,
+  SizePreset,
+  TableHeaderProps,
+} from "./hero";
+/* ==== END hero ==== */

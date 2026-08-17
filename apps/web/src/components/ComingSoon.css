@@ -1,0 +1,32 @@
+.coming-soon {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fr-space-2);
+  max-width: 640px;
+  padding: var(--fr-space-10) var(--fr-space-8);
+}
+
+.coming-soon__eyebrow {
+  margin: 0;
+  font-size: var(--fr-font-size-label-md);
+  font-weight: var(--fr-font-weight-bold);
+  letter-spacing: var(--fr-letter-spacing-wider);
+  text-transform: uppercase;
+  color: var(--fr-glow);
+}
+
+.coming-soon__title {
+  margin: 0;
+  font-family: var(--fr-font-display);
+  font-size: var(--fr-font-size-display-md);
+  font-weight: var(--fr-font-weight-bold);
+  letter-spacing: var(--fr-letter-spacing-tight);
+  color: var(--fr-text);
+}
+
+.coming-soon__body {
+  margin: 0;
+  max-width: 60ch;
+  font-size: var(--fr-font-size-body-md);
+  color: var(--fr-muted);
+}

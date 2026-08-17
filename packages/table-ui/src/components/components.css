@@ -1,0 +1,523 @@
+/*
+ * Freeroll table kit — DC1 presentational components.
+ *
+ * Normative specs:
+ *   - card face / back / slot ....... poker-internal/design/explorations/cards.html
+ *   - open-plan felt, plate L/M/S ... poker-internal/design/explorations/table.html
+ *   - mood rim, avatar disc ......... poker-internal/design/explorations/characters.html
+ *   - motion ........................ poker-internal/content/motion/beats.md
+ *
+ * Token law (docs/design-system.md): every colour, type, duration and easing in
+ * this file is a `var(--fr-*)` custom property from `@poker/ui/tokens.css`.
+ * Alpha variants are composed with `color-mix()` against a token — never an
+ * rgba() literal. The only bare numbers are geometry (ratios and px sizes the
+ * design specs author directly: 72/56/24 card widths, 34/26/21 avatar discs,
+ * the 8px read dot, the 16px dealer disc) and the 1.2s think-pulse period from
+ * beats.md §4.14.
+ *
+ * Import once, alongside the tokens:
+ *   import "@poker/ui/tokens.css";
+ *   import "@poker/table-ui/components.css";
+ */
+
+/* -------------------------------------------------------------------------- */
+/* shared                                                                     */
+/* -------------------------------------------------------------------------- */
+
+/* `.fr-num` (tabular figures) is owned by `@poker/ui`'s components.css — the
+   amount classes below set `font-variant-numeric` themselves so this sheet also
+   stands on its own. */
+
+/* Density scale. Set by `<Felt density>` and by `<SeatPlate density>`; a plate
+   without its own density inherits the felt's. table.html Study 2. */
+[data-fr-density="2"] {
+  --fr-seat-avatar: 34px;
+  --fr-seat-name-size: var(--fr-font-size-body-xs);
+  --fr-seat-stack-size: var(--fr-font-size-label-md);
+  --fr-seat-gap: var(--fr-space-2);
+}
+
+[data-fr-density="6"] {
+  --fr-seat-avatar: 26px;
+  --fr-seat-name-size: var(--fr-font-size-label-md);
+  --fr-seat-stack-size: var(--fr-font-size-label-sm);
+  --fr-seat-gap: var(--fr-space-2);
+}
+
+[data-fr-density="9"] {
+  --fr-seat-avatar: 21px;
+  --fr-seat-name-size: var(--fr-font-size-label-sm);
+  --fr-seat-stack-size: var(--fr-font-size-label-sm);
+  --fr-seat-gap: var(--fr-space-1);
+}
+
+/* -------------------------------------------------------------------------- */
+/* PlayingCard — the "Reader" face (cards.html Study 1B)                      */
+/* -------------------------------------------------------------------------- */
+
+.fr-card,
+.fr-card-slot {
+  --fr-card-w: 56px;
+  position: relative;
+  display: block;
+  flex: none;
+  box-sizing: border-box;
+  width: var(--fr-card-w);
+  height: calc(var(--fr-card-w) * 1.4);
+  border-radius: calc(var(--fr-card-w) * 0.13);
+  font-family: var(--fr-font-display);
+  font-size: calc(var(--fr-card-w) * 0.3);
+}
+
+.fr-card[data-size="hero"],
+.fr-card-slot[data-size="hero"],
+.fr-board[data-size="hero"] {
+  --fr-card-w: 72px;
+}
+
+.fr-card[data-size="table"],
+.fr-card-slot[data-size="table"],
+.fr-board[data-size="table"] {
+  --fr-card-w: 56px;
+}
+
+.fr-card[data-size="hud"],
+.fr-card-slot[data-size="hud"],
+.fr-board[data-size="hud"] {
+  --fr-card-w: 24px;
+}
+
+.fr-card--face {
+  background: var(--fr-cardface);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--fr-ink-0) 35%, transparent),
+    0 calc(var(--fr-card-w) * 0.06) calc(var(--fr-card-w) * 0.18)
+      color-mix(in srgb, var(--fr-ink-0) 35%, transparent);
+}
+
+/* Rank owns the top-left, oversized. Nothing is mirrored. */
+.fr-card__rank {
+  position: absolute;
+  top: 3%;
+  left: 9%;
+  font-size: 1.42em;
+  font-weight: var(--fr-font-weight-bold);
+  line-height: var(--fr-line-height-tight);
+  letter-spacing: var(--fr-letter-spacing-tighter);
+}
+
+/* Suit anchors the bottom-right. */
+.fr-card__suit {
+  position: absolute;
+  right: 8%;
+  bottom: 4%;
+  font-size: 1.15em;
+  line-height: 1;
+}
+
+/* 4-colour deck — colourblind-safe by construction, not by toggle. */
+.fr-card[data-suit="s"] {
+  color: var(--fr-suit-s);
+}
+
+.fr-card[data-suit="h"] {
+  color: var(--fr-suit-h);
+}
+
+.fr-card[data-suit="d"] {
+  color: var(--fr-suit-d);
+}
+
+.fr-card[data-suit="c"] {
+  color: var(--fr-suit-c);
+}
+
+/* Card back: near-black base, gradient keyline, soft centre glow. The keyline
+   and glow read the skin's accent pair, so a skin swap re-skins the deck. */
+.fr-card--back {
+  background: var(--fr-ink-150);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--fr-ink-0) 40%, transparent),
+    0 calc(var(--fr-card-w) * 0.06) calc(var(--fr-card-w) * 0.18)
+      color-mix(in srgb, var(--fr-ink-0) 40%, transparent);
+}
+
+.fr-card--back::before {
+  content: "";
+  position: absolute;
+  inset: 9%;
+  padding: 1.5px;
+  border-radius: calc(var(--fr-card-w) * 0.08);
+  background: linear-gradient(135deg, var(--fr-accent-a), var(--fr-accent-b));
+  opacity: 0.9;
+  -webkit-mask:
+    linear-gradient(var(--fr-ink-0) 0 0) content-box,
+    linear-gradient(var(--fr-ink-0) 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(var(--fr-ink-0) 0 0) content-box,
+    linear-gradient(var(--fr-ink-0) 0 0);
+  mask-composite: exclude;
+}
+
+.fr-card--back::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(closest-side at 50% 46%, var(--fr-accent-a) 0%, transparent 72%),
+    radial-gradient(closest-side at 50% 60%, var(--fr-accent-b) 0%, transparent 80%);
+  opacity: 0.22;
+}
+
+/* Released, not deleted. */
+.fr-card[data-mucked="true"] {
+  opacity: 0.38;
+  filter: saturate(0.2);
+}
+
+/* The undealt street is a promise, not a hole. */
+.fr-card-slot {
+  border: 1.5px dashed color-mix(in srgb, var(--fr-text) 22%, transparent);
+  background: color-mix(in srgb, var(--fr-text) 3%, transparent);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Board                                                                      */
+/* -------------------------------------------------------------------------- */
+
+.fr-board {
+  --fr-card-w: 56px;
+  display: flex;
+  align-items: flex-end;
+  gap: calc(var(--fr-card-w) * 0.14);
+  z-index: var(--fr-z-board);
+}
+
+.fr-board__cell {
+  display: block;
+  flex: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Felt — open plan: light, not furniture (table.html Study 1C)               */
+/* -------------------------------------------------------------------------- */
+
+.fr-felt {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--fr-radius-xl);
+  background: radial-gradient(
+    120% 100% at 50% 0%,
+    color-mix(in srgb, var(--fr-canvas) 84%, var(--fr-surface)),
+    var(--fr-canvas) 70%
+  );
+  color: var(--fr-text);
+  font-family: var(--fr-font-body);
+}
+
+/* No rail. A pool of felt light on the canvas; seats project into it. */
+.fr-felt__glow {
+  position: absolute;
+  inset: 0;
+  z-index: var(--fr-z-felt);
+  pointer-events: none;
+  background: radial-gradient(
+    52% 46% at 50% 45%,
+    var(--fr-felt1) 0%,
+    color-mix(in srgb, var(--fr-felt1) 55%, var(--fr-felt2)) 40%,
+    transparent 76%
+  );
+}
+
+.fr-felt__scene {
+  position: absolute;
+  inset: 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* SeatPlate (table.html Study 2)                                             */
+/* -------------------------------------------------------------------------- */
+
+.fr-seat {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fr-space-1);
+  z-index: var(--fr-z-seat);
+}
+
+.fr-seat__plate {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--fr-seat-gap, var(--fr-space-2));
+  padding: var(--fr-space-1) var(--fr-space-3) var(--fr-space-1) var(--fr-space-1);
+  border: 1px solid color-mix(in srgb, var(--fr-text) 7%, transparent);
+  border-radius: var(--fr-radius-pill);
+  background: color-mix(in srgb, var(--fr-plate) 91%, transparent);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--fr-ink-0) 33%, transparent);
+  white-space: nowrap;
+  transition:
+    opacity var(--fr-duration-quick) var(--fr-ease-smooth-out),
+    box-shadow var(--fr-duration-fast) var(--fr-ease-smooth-out);
+}
+
+.fr-seat[data-fr-density="9"] .fr-seat__plate {
+  padding: var(--fr-space-1) var(--fr-space-2) var(--fr-space-1) var(--fr-space-1);
+}
+
+/* Hero's plate never compresses — always plate M+, at every density. */
+.fr-seat[data-hero="true"][data-fr-density="9"] {
+  --fr-seat-avatar: 26px;
+  --fr-seat-name-size: var(--fr-font-size-label-md);
+  --fr-seat-stack-size: var(--fr-font-size-label-sm);
+  --fr-seat-gap: var(--fr-space-2);
+}
+
+.fr-seat[data-hero="true"][data-fr-density="9"] .fr-seat__plate {
+  padding: var(--fr-space-1) var(--fr-space-3) var(--fr-space-1) var(--fr-space-1);
+}
+
+.fr-seat[data-hero="true"] .fr-seat__plate {
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--fr-glow) 44%, transparent),
+    0 4px 18px color-mix(in srgb, var(--fr-ink-0) 38%, transparent);
+}
+
+/* Out of the hand: dimmed, never deleted. */
+.fr-seat[data-folded="true"] .fr-seat__plate {
+  opacity: 0.42;
+}
+
+.fr-seat__portrait {
+  position: relative;
+  flex: none;
+  line-height: 0;
+}
+
+.fr-seat__avatar {
+  display: grid;
+  place-items: center;
+  width: var(--fr-seat-avatar, 26px);
+  height: var(--fr-seat-avatar, 26px);
+  border-radius: var(--fr-radius-circle);
+  background: linear-gradient(
+    135deg,
+    var(--fr-seat-avatar-1, var(--fr-accent-a)),
+    var(--fr-seat-avatar-2, var(--fr-accent-b))
+  );
+  color: var(--fr-ink-100);
+  font-size: calc(var(--fr-seat-avatar, 26px) * 0.42);
+  font-weight: var(--fr-font-weight-bold);
+  line-height: 1;
+  transition: box-shadow var(--fr-duration-very-slow) var(--fr-ease-in-out);
+}
+
+/* Mood rim (characters.html Study 2): heated is missable if you are not paying
+   attention, steaming is catchable by anyone who is. Faces never carry the skin
+   accent — rims do. */
+.fr-seat[data-mood="heated"] .fr-seat__avatar {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--fr-accent-a) 42%, transparent);
+}
+
+.fr-seat[data-mood="steaming"] .fr-seat__avatar {
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--fr-accent-a) 78%, transparent),
+    0 0 10px color-mix(in srgb, var(--fr-accent-b) 45%, transparent);
+}
+
+/* The earned read. 8px, top-right of the avatar — never scales, never moves. */
+.fr-seat__read-dot {
+  position: absolute;
+  top: -2px;
+  right: -1px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--fr-radius-circle);
+  background: linear-gradient(135deg, var(--fr-accent-a), var(--fr-accent-b));
+  box-shadow: 0 0 0 2px var(--fr-canvas);
+}
+
+.fr-seat__who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: var(--fr-line-height-tight);
+}
+
+.fr-seat__name {
+  color: var(--fr-text);
+  font-size: var(--fr-seat-name-size, var(--fr-font-size-label-md));
+  font-weight: var(--fr-font-weight-semibold);
+}
+
+.fr-seat__stack {
+  color: var(--fr-muted);
+  font-size: var(--fr-seat-stack-size, var(--fr-font-size-label-sm));
+  font-variant-numeric: tabular-nums;
+}
+
+.fr-seat__hud {
+  margin-left: var(--fr-space-1);
+  padding: 1px 6px;
+  border: 1px solid color-mix(in srgb, var(--fr-text) 4%, transparent);
+  border-radius: var(--fr-radius-pill);
+  background: color-mix(in srgb, var(--fr-text) 5%, transparent);
+  color: var(--fr-muted);
+  font-size: var(--fr-font-size-label-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Turn indicator: the breathing think-pulse, 1.2s loop (beats.md §4.14). */
+.fr-seat__pulse {
+  position: absolute;
+  inset: -3px;
+  border-radius: var(--fr-radius-pill);
+  pointer-events: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--fr-glow) 60%, transparent);
+  animation: fr-seat-think 1200ms var(--fr-ease-in-out) infinite;
+}
+
+@keyframes fr-seat-think {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Reduce-motion: the pulse becomes a static ring (beats.md §4.14). */
+@media (prefers-reduced-motion: reduce) {
+  .fr-seat__pulse {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* PotDisplay — a quiet pill                                                  */
+/* -------------------------------------------------------------------------- */
+
+.fr-pot {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fr-space-2);
+  padding: var(--fr-space-1) var(--fr-space-3);
+  border: 1px solid color-mix(in srgb, var(--fr-text) 6%, transparent);
+  border-radius: var(--fr-radius-pill);
+  background: color-mix(in srgb, var(--fr-ink-0) 32%, transparent);
+  color: var(--fr-muted);
+  font-family: var(--fr-font-body);
+  font-size: var(--fr-font-size-label-md);
+  white-space: nowrap;
+}
+
+.fr-pot--placed {
+  position: absolute;
+  left: var(--fr-pot-x, 50%);
+  top: var(--fr-pot-y, 56%);
+  z-index: var(--fr-z-pot);
+  transform: translate(-50%, -50%);
+}
+
+.fr-pot__amount {
+  color: var(--fr-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------------------------------- */
+/* BetChips — on the seat -> pot axis                                         */
+/* -------------------------------------------------------------------------- */
+
+.fr-bet {
+  --fr-chip-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fr-space-1);
+  color: var(--fr-text);
+  font-family: var(--fr-font-body);
+  font-size: var(--fr-font-size-label-sm);
+}
+
+/* Positioned by the parent: it sets --fr-bet-x / --fr-bet-y at 35% of the
+   seat -> pot distance (table.html Study 2). */
+.fr-bet--placed {
+  position: absolute;
+  left: var(--fr-bet-x, 50%);
+  top: var(--fr-bet-y, 50%);
+  z-index: var(--fr-z-bet);
+  transform: translate(-50%, -50%);
+}
+
+/* Chips shrink with the tier; numbers never do. */
+.fr-bet[data-tier="1"] {
+  --fr-chip-size: 11px;
+}
+
+.fr-bet[data-tier="2"] {
+  --fr-chip-size: 13px;
+}
+
+.fr-bet[data-tier="3"] {
+  --fr-chip-size: 15px;
+}
+
+.fr-bet[data-tier="4"] {
+  --fr-chip-size: 17px;
+}
+
+.fr-bet__chip {
+  flex: none;
+  width: var(--fr-chip-size);
+  height: var(--fr-chip-size);
+  border-radius: var(--fr-radius-circle);
+  background: radial-gradient(
+    circle at 35% 30%,
+    var(--fr-accent-b),
+    color-mix(in srgb, var(--fr-accent-b) 55%, var(--fr-ink-0))
+  );
+  box-shadow:
+    0 2px 0 color-mix(in srgb, var(--fr-accent-b) 40%, var(--fr-ink-0)),
+    inset 0 0 0 2.5px color-mix(in srgb, var(--fr-text) 18%, transparent);
+}
+
+.fr-bet__amount {
+  color: var(--fr-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------------------------------- */
+/* DealerButton                                                               */
+/* -------------------------------------------------------------------------- */
+
+.fr-dealer {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--fr-radius-circle);
+  background: var(--fr-cardface);
+  color: var(--fr-suit-s);
+  font-family: var(--fr-font-body);
+  font-size: var(--fr-font-size-label-sm);
+  font-weight: var(--fr-font-weight-bold);
+  line-height: 1;
+  box-shadow: 0 2px 5px color-mix(in srgb, var(--fr-ink-0) 44%, transparent);
+}
+
+/* Felt-side of the plate, ~30 degrees toward the pot — parent sets the vars. */
+.fr-dealer--placed {
+  position: absolute;
+  left: var(--fr-dealer-x, 50%);
+  top: var(--fr-dealer-y, 50%);
+  z-index: var(--fr-z-marker);
+  transform: translate(-50%, -50%);
+}
