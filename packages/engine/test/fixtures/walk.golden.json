@@ -1,0 +1,95 @@
+[
+  {
+    "t": "start",
+    "handNumber": 1,
+    "button": 10,
+    "seats": [
+      {
+        "seat": 10,
+        "stack": 5000
+      },
+      {
+        "seat": 20,
+        "stack": 5000
+      },
+      {
+        "seat": 30,
+        "stack": 5000
+      }
+    ],
+    "blinds": {
+      "sb": 50,
+      "bb": 100,
+      "ante": 0
+    }
+  },
+  {
+    "t": "post",
+    "seat": 20,
+    "kind": "sb",
+    "amount": 50
+  },
+  {
+    "t": "post",
+    "seat": 30,
+    "kind": "bb",
+    "amount": 100
+  },
+  {
+    "t": "hole",
+    "seat": 20,
+    "cards": [
+      22,
+      5
+    ]
+  },
+  {
+    "t": "hole",
+    "seat": 30,
+    "cards": [
+      48,
+      20
+    ]
+  },
+  {
+    "t": "hole",
+    "seat": 10,
+    "cards": [
+      43,
+      23
+    ]
+  },
+  {
+    "t": "act",
+    "seat": 10,
+    "kind": "fold"
+  },
+  {
+    "t": "act",
+    "seat": 20,
+    "kind": "fold"
+  },
+  {
+    "t": "pot",
+    "potIndex": 0,
+    "seat": 30,
+    "amount": 150
+  },
+  {
+    "t": "end",
+    "net": [
+      {
+        "seat": 10,
+        "net": 0
+      },
+      {
+        "seat": 20,
+        "net": -50
+      },
+      {
+        "seat": 30,
+        "net": 50
+      }
+    ]
+  }
+]

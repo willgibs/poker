@@ -1,0 +1,170 @@
+[
+  {
+    "t": "start",
+    "handNumber": 1,
+    "button": 0,
+    "seats": [
+      {
+        "seat": 0,
+        "stack": 1200
+      },
+      {
+        "seat": 1,
+        "stack": 300
+      },
+      {
+        "seat": 2,
+        "stack": 800
+      }
+    ],
+    "blinds": {
+      "sb": 50,
+      "bb": 100,
+      "ante": 0
+    }
+  },
+  {
+    "t": "post",
+    "seat": 1,
+    "kind": "sb",
+    "amount": 50
+  },
+  {
+    "t": "post",
+    "seat": 2,
+    "kind": "bb",
+    "amount": 100
+  },
+  {
+    "t": "hole",
+    "seat": 1,
+    "cards": [
+      50,
+      49
+    ]
+  },
+  {
+    "t": "hole",
+    "seat": 2,
+    "cards": [
+      44,
+      45
+    ]
+  },
+  {
+    "t": "hole",
+    "seat": 0,
+    "cards": [
+      51,
+      48
+    ]
+  },
+  {
+    "t": "act",
+    "seat": 0,
+    "kind": "raise",
+    "toAmount": 1200
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "call",
+    "amount": 250
+  },
+  {
+    "t": "act",
+    "seat": 2,
+    "kind": "call",
+    "amount": 700
+  },
+  {
+    "t": "board",
+    "street": "flop",
+    "cards": [
+      20,
+      21,
+      2
+    ]
+  },
+  {
+    "t": "board",
+    "street": "turn",
+    "cards": [
+      15
+    ]
+  },
+  {
+    "t": "board",
+    "street": "river",
+    "cards": [
+      30
+    ]
+  },
+  {
+    "t": "showdown",
+    "reveals": [
+      {
+        "seat": 0,
+        "cards": [
+          51,
+          48
+        ]
+      },
+      {
+        "seat": 1,
+        "cards": [
+          50,
+          49
+        ]
+      },
+      {
+        "seat": 2,
+        "cards": [
+          44,
+          45
+        ]
+      }
+    ]
+  },
+  {
+    "t": "pot",
+    "potIndex": 0,
+    "seat": 1,
+    "amount": 450
+  },
+  {
+    "t": "pot",
+    "potIndex": 0,
+    "seat": 0,
+    "amount": 450
+  },
+  {
+    "t": "pot",
+    "potIndex": 1,
+    "seat": 0,
+    "amount": 1000
+  },
+  {
+    "t": "pot",
+    "potIndex": 2,
+    "seat": 0,
+    "amount": 400
+  },
+  {
+    "t": "end",
+    "net": [
+      {
+        "seat": 0,
+        "net": 650
+      },
+      {
+        "seat": 1,
+        "net": 150
+      },
+      {
+        "seat": 2,
+        "net": -800
+      }
+    ]
+  }
+]

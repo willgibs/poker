@@ -1,0 +1,139 @@
+[
+  {
+    "t": "start",
+    "handNumber": 1,
+    "button": 0,
+    "seats": [
+      {
+        "seat": 0,
+        "stack": 10000
+      },
+      {
+        "seat": 1,
+        "stack": 10000
+      }
+    ],
+    "blinds": {
+      "sb": 50,
+      "bb": 100,
+      "ante": 0
+    }
+  },
+  {
+    "t": "post",
+    "seat": 0,
+    "kind": "sb",
+    "amount": 50
+  },
+  {
+    "t": "post",
+    "seat": 1,
+    "kind": "bb",
+    "amount": 100
+  },
+  {
+    "t": "hole",
+    "seat": 1,
+    "cards": [
+      35,
+      3
+    ]
+  },
+  {
+    "t": "hole",
+    "seat": 0,
+    "cards": [
+      36,
+      37
+    ]
+  },
+  {
+    "t": "act",
+    "seat": 0,
+    "kind": "call",
+    "amount": 50
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "check"
+  },
+  {
+    "t": "board",
+    "street": "flop",
+    "cards": [
+      9,
+      27,
+      16
+    ]
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "check"
+  },
+  {
+    "t": "act",
+    "seat": 0,
+    "kind": "check"
+  },
+  {
+    "t": "board",
+    "street": "turn",
+    "cards": [
+      29
+    ]
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "check"
+  },
+  {
+    "t": "act",
+    "seat": 0,
+    "kind": "check"
+  },
+  {
+    "t": "board",
+    "street": "river",
+    "cards": [
+      41
+    ]
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "check"
+  },
+  {
+    "t": "act",
+    "seat": 0,
+    "kind": "bet",
+    "amount": 500
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "fold"
+  },
+  {
+    "t": "pot",
+    "potIndex": 0,
+    "seat": 0,
+    "amount": 700
+  },
+  {
+    "t": "end",
+    "net": [
+      {
+        "seat": 0,
+        "net": 100
+      },
+      {
+        "seat": 1,
+        "net": -100
+      }
+    ]
+  }
+]

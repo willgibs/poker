@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sound-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m","http.server","8901","--directory","/private/tmp/claude-501/-Users-gibby-local-ai-poker/e7bea479-d3b9-4708-8a78-20781a28b904/scratchpad"],
+      "port": 8901
+    }
+  ]
+}

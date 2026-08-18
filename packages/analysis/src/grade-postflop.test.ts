@@ -476,3 +476,22 @@ describe("test corpus sanity", () => {
     expect(cards("As", "Kd")).toEqual([51, 45]);
   });
 });
+
+describe("gradePostflop — determinism under a custom policy", () => {
+  it("stays deterministic when a custom range-filtering policy is injected", () => {
+    // The "determinism and decision keys" describe block above pins repeat
+    // calls under Monte Carlo sampling; this does the same for the range
+    // estimation path with a `policy` supplied, since filtering runs its own
+    // pass over the range and could in principle depend on iteration order.
+    const record = riverSpot({ ...HERO_NUTS, bet: 200, line: "call" });
+    const a = gradePostflop(record, {
+      heroSeat: 0,
+      policy: (ctx) => (ctx.kind === "bet" ? Math.pow(ctx.strength, 40) : 1),
+    });
+    const b = gradePostflop(record, {
+      heroSeat: 0,
+      policy: (ctx) => (ctx.kind === "bet" ? Math.pow(ctx.strength, 40) : 1),
+    });
+    expect(a).toEqual(b);
+  });
+});

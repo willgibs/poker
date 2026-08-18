@@ -508,3 +508,162 @@ describe("leak report shape", () => {
     expect(LEAK_DETECTORS.length).toBeLessThanOrEqual(12);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Edge-case coverage: threshold boundaries, hand-count floors, and
+// corroboration exoneration for the detectors the describe blocks above only
+// exercise with wide margins. `offBy` in leaks.ts is a STRICT inequality
+// (`by > 0`), so a value sitting exactly on the threshold must not fire and
+// the very next value past it must — that contract is what these tests pin.
+// ---------------------------------------------------------------------------
+
+describe("leak detector threshold boundaries — strict inequality, not inclusive", () => {
+  it("tight-preflop: 18% VPIP exactly does not fire; 17% does", () => {
+    const atThreshold = corpus([
+      ["hero-opens-utg", 180],
+      ["hero-folds-utg", 820],
+    ]);
+    const justBelow = corpus([
+      ["hero-opens-utg", 170],
+      ["hero-folds-utg", 830],
+    ]);
+    expect(statValue(aggregateStats(atThreshold, HERO), "vpip")).toBe(18);
+    expect(statValue(aggregateStats(justBelow, HERO), "vpip")).toBe(17);
+    expect(fired(atThreshold, "tight-preflop")).toBe(false);
+    expect(fired(justBelow, "tight-preflop")).toBe(true);
+  });
+
+  it("open-limping: 2% limps exactly does not fire; past it does", () => {
+    const atThreshold = corpus([
+      ["hero-limps-utg", 20],
+      ["hero-folds-utg", 980],
+    ]);
+    const justAbove = corpus([
+      ["hero-limps-utg", 21],
+      ["hero-folds-utg", 979],
+    ]);
+    expect(statValue(aggregateStats(atThreshold, HERO), "openLimp")).toBeCloseTo(2, 6);
+    expect(statValue(aggregateStats(justAbove, HERO), "openLimp")).toBeCloseTo(2.1, 6);
+    expect(fired(atThreshold, "open-limping")).toBe(false);
+    expect(fired(justAbove, "open-limping")).toBe(true);
+  });
+
+  it("one-and-done: 40% turn barrel exactly does not fire; 39% does", () => {
+    const atThreshold = corpus([
+      ["hero-cbets-then-barrels", 40],
+      ["hero-cbets-then-gives-up", 60],
+      ["hero-folds-utg", 700],
+    ]);
+    const justBelow = corpus([
+      ["hero-cbets-then-barrels", 39],
+      ["hero-cbets-then-gives-up", 61],
+      ["hero-folds-utg", 700],
+    ]);
+    expect(statValue(aggregateStats(atThreshold, HERO), "turnBarrel")).toBe(40);
+    expect(statValue(aggregateStats(justBelow, HERO), "turnBarrel")).toBe(39);
+    expect(fired(atThreshold, "one-and-done")).toBe(false);
+    expect(fired(justBelow, "one-and-done")).toBe(true);
+  });
+});
+
+describe("leak detectors stay quiet up to each stat family's exact hand-count floor", () => {
+  // The existing "minimum-sample gates" describe block above pins this for
+  // the preflop-frequency family (200) via loose-preflop. These do the same
+  // one-hand-either-side check for the other three families, holding the
+  // stat's own value and opportunity count fixed so the family gate is the
+  // only thing that moves.
+  it("preflop-response (500): over-folds-to-three-bet", () => {
+    const under = corpus([
+      ["hero-folds-to-3bet", 90],
+      ["hero-calls-3bet", 10],
+      ["hero-opens-utg", 399],
+    ]);
+    const over = corpus([
+      ["hero-folds-to-3bet", 90],
+      ["hero-calls-3bet", 10],
+      ["hero-opens-utg", 400],
+    ]);
+    expect(aggregateStats(under, HERO).hands).toBe(499);
+    expect(aggregateStats(over, HERO).hands).toBe(500);
+    expect(fired(under, "over-folds-to-three-bet")).toBe(false);
+    expect(fired(over, "over-folds-to-three-bet")).toBe(true);
+  });
+
+  it("postflop-cbet (750): cbet-too-rare", () => {
+    const under = corpus([
+      ["hero-cbets-flop", 20],
+      ["hero-checks-flop", 80],
+      ["hero-folds-utg", 649],
+    ]);
+    const over = corpus([
+      ["hero-cbets-flop", 20],
+      ["hero-checks-flop", 80],
+      ["hero-folds-utg", 650],
+    ]);
+    expect(aggregateStats(under, HERO).hands).toBe(749);
+    expect(aggregateStats(over, HERO).hands).toBe(750);
+    expect(fired(under, "cbet-too-rare")).toBe(false);
+    expect(fired(over, "cbet-too-rare")).toBe(true);
+  });
+
+  it("showdown (2000): passive-postflop", () => {
+    const under = corpus([
+      ["hero-showdown-win", 200],
+      ["hero-showdown-loss", 800],
+      ["hero-folds-utg", 999],
+    ]);
+    const over = corpus([
+      ["hero-showdown-win", 200],
+      ["hero-showdown-loss", 800],
+      ["hero-folds-utg", 1000],
+    ]);
+    expect(aggregateStats(under, HERO).hands).toBe(1999);
+    expect(aggregateStats(over, HERO).hands).toBe(2000);
+    expect(fired(under, "passive-postflop")).toBe(false);
+    expect(fired(over, "passive-postflop")).toBe(true);
+  });
+});
+
+describe("conflicting-evidence exoneration", () => {
+  it("showdown-chasing: the corroborating W$SD stat exonerates right at its own 48% boundary", () => {
+    // WTSD is a stable 50% (well past its 32% threshold) in both corpora —
+    // only W$SD moves, straddling the corroborating stat's own threshold.
+    const atBoundary = corpus([
+      ["hero-showdown-win", 48],
+      ["hero-showdown-loss", 52],
+      ["hero-cbets-flop", 100],
+      ["hero-folds-utg", 1800],
+    ]);
+    const justBelow = corpus([
+      ["hero-showdown-win", 47],
+      ["hero-showdown-loss", 53],
+      ["hero-cbets-flop", 100],
+      ["hero-folds-utg", 1800],
+    ]);
+    const aggAt = aggregateStats(atBoundary, HERO);
+    const aggBelow = aggregateStats(justBelow, HERO);
+    expect(statValue(aggAt, "wtsd")).toBeCloseTo(50, 6);
+    expect(statValue(aggAt, "wsd")).toBe(48);
+    expect(statValue(aggBelow, "wsd")).toBe(47);
+    // At exactly 48, "W$SD below 48" does not hold: the corroboration fails
+    // and the primary WTSD signal alone is not reported as a leak.
+    expect(fired(atBoundary, "showdown-chasing")).toBe(false);
+    // One point under, corroboration clears and the leak fires.
+    expect(fired(justBelow, "showdown-chasing")).toBe(true);
+  });
+});
+
+describe("grading determinism — aggregateStats and leak detection are pure", () => {
+  it("produce identical output across repeated calls over the same records", () => {
+    const records = corpus([
+      ["hero-limps-utg", 600],
+      ["hero-opens-utg", 200],
+      ["hero-folds-utg", 1400],
+    ]);
+    const aggA = aggregateStats(records, HERO);
+    const aggB = aggregateStats(records, HERO);
+    expect(aggA).toEqual(aggB);
+    expect(evaluateDetectors(aggA)).toEqual(evaluateDetectors(aggB));
+    expect(detectLeaks(aggA)).toEqual(detectLeaks(aggregateStats(records, HERO)));
+  });
+});

@@ -1,0 +1,243 @@
+[
+  {
+    "t": "start",
+    "handNumber": 1,
+    "button": 3,
+    "seats": [
+      {
+        "seat": 0,
+        "stack": 5
+      },
+      {
+        "seat": 1,
+        "stack": 10000
+      },
+      {
+        "seat": 2,
+        "stack": 10000
+      },
+      {
+        "seat": 3,
+        "stack": 10000
+      }
+    ],
+    "blinds": {
+      "sb": 50,
+      "bb": 100,
+      "ante": 10
+    }
+  },
+  {
+    "t": "post",
+    "seat": 0,
+    "kind": "ante",
+    "amount": 5
+  },
+  {
+    "t": "post",
+    "seat": 1,
+    "kind": "ante",
+    "amount": 10
+  },
+  {
+    "t": "post",
+    "seat": 2,
+    "kind": "ante",
+    "amount": 10
+  },
+  {
+    "t": "post",
+    "seat": 3,
+    "kind": "ante",
+    "amount": 10
+  },
+  {
+    "t": "post",
+    "seat": 1,
+    "kind": "bb",
+    "amount": 100
+  },
+  {
+    "t": "hole",
+    "seat": 0,
+    "cards": [
+      20,
+      41
+    ]
+  },
+  {
+    "t": "hole",
+    "seat": 1,
+    "cards": [
+      9,
+      33
+    ]
+  },
+  {
+    "t": "hole",
+    "seat": 2,
+    "cards": [
+      35,
+      29
+    ]
+  },
+  {
+    "t": "hole",
+    "seat": 3,
+    "cards": [
+      11,
+      39
+    ]
+  },
+  {
+    "t": "act",
+    "seat": 2,
+    "kind": "call",
+    "amount": 100
+  },
+  {
+    "t": "act",
+    "seat": 3,
+    "kind": "call",
+    "amount": 100
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "check"
+  },
+  {
+    "t": "board",
+    "street": "flop",
+    "cards": [
+      46,
+      38,
+      5
+    ]
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "check"
+  },
+  {
+    "t": "act",
+    "seat": 2,
+    "kind": "check"
+  },
+  {
+    "t": "act",
+    "seat": 3,
+    "kind": "check"
+  },
+  {
+    "t": "board",
+    "street": "turn",
+    "cards": [
+      50
+    ]
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "check"
+  },
+  {
+    "t": "act",
+    "seat": 2,
+    "kind": "check"
+  },
+  {
+    "t": "act",
+    "seat": 3,
+    "kind": "check"
+  },
+  {
+    "t": "board",
+    "street": "river",
+    "cards": [
+      45
+    ]
+  },
+  {
+    "t": "act",
+    "seat": 1,
+    "kind": "check"
+  },
+  {
+    "t": "act",
+    "seat": 2,
+    "kind": "check"
+  },
+  {
+    "t": "act",
+    "seat": 3,
+    "kind": "check"
+  },
+  {
+    "t": "showdown",
+    "reveals": [
+      {
+        "seat": 0,
+        "cards": [
+          20,
+          41
+        ]
+      },
+      {
+        "seat": 1,
+        "cards": [
+          9,
+          33
+        ]
+      },
+      {
+        "seat": 2,
+        "cards": [
+          35,
+          29
+        ]
+      },
+      {
+        "seat": 3,
+        "cards": [
+          11,
+          39
+        ]
+      }
+    ]
+  },
+  {
+    "t": "pot",
+    "potIndex": 0,
+    "seat": 3,
+    "amount": 20
+  },
+  {
+    "t": "pot",
+    "potIndex": 1,
+    "seat": 3,
+    "amount": 315
+  },
+  {
+    "t": "end",
+    "net": [
+      {
+        "seat": 0,
+        "net": -5
+      },
+      {
+        "seat": 1,
+        "net": -110
+      },
+      {
+        "seat": 2,
+        "net": -110
+      },
+      {
+        "seat": 3,
+        "net": 225
+      }
+    ]
+  }
+]

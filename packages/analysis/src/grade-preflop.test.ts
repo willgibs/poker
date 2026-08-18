@@ -399,3 +399,27 @@ describe("chart id convention", () => {
     expect(nearestNashDepth(100)).toBe(15); // clamped to the charts we hold
   });
 });
+
+// ---------------------------------------------------------------------------
+// The existing "is deterministic" test above only exercises the Monte Carlo
+// push/fold path. The plain chart-lookup path has no sampling at all, but a
+// grader that quietly depended on object/Map iteration order or accumulated
+// mutable state would still be able to disagree with itself between calls —
+// this pins that it does not, on both a chart-covered and an ungraded spot.
+// ---------------------------------------------------------------------------
+
+describe("gradePreflop — determinism off the Monte Carlo path", () => {
+  it("is deterministic on the plain chart-lookup path — nothing sampled, nothing to vary", () => {
+    const record = utgOpen("As", "Ad", "raise");
+    const a = gradePreflop(record, { heroSeat: 3, chartSet: CASH });
+    const b = gradePreflop(record, { heroSeat: 3, chartSet: CASH });
+    expect(a).toEqual(b);
+  });
+
+  it("is deterministic on the honest-gap path too — an ungraded spot stays ungraded identically", () => {
+    const record = utgOpen("As", "4s", "limp");
+    const a = gradePreflop(record, { heroSeat: 3, chartSet: CASH });
+    const b = gradePreflop(record, { heroSeat: 3, chartSet: CASH });
+    expect(a).toEqual(b);
+  });
+});
