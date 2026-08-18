@@ -455,7 +455,7 @@ describe("enqueue during playback", () => {
   // byte-identical single-grouped, zero-duration deal-hole output on the next
   // enqueue. Skipped because it encodes the documented/intended behavior, which
   // the current code does not implement.
-  it.skip("escalates by only the next compression tier when barely over the guard, not straight to instant", () => {
+  it("escalates by only the next compression tier when barely over the guard, not straight to instant", () => {
     const rec = recorder();
     const presenter = harness({ onBeat: rec.onBeat, guard: 1500 });
     presenter.enqueueBeats([fillerBeat(1501)], "now"); // barely over the guard

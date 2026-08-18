@@ -161,7 +161,11 @@ export function createPresenter(config: PresenterConfig): Presenter {
       let speed: Speed = opts.speed;
       if (Number.isFinite(guard)) {
         // Backlog guard: never let animation debt accumulate (beats.md §3).
-        while (horizon() - clock > guard && speed !== "instant") speed = nextSpeedTier(speed);
+        // One compression tier per enqueue — the condition is invariant within a
+        // single call (nothing here drains the queue), so a loop would always run
+        // to "instant"; stepping once per enqueue escalates gradually until the
+        // backlog is caught up, which is what the §3 contract describes.
+        if (horizon() - clock > guard && speed !== "instant") speed = nextSpeedTier(speed);
       }
       const beats = schedule(events, { ...opts, speed, startAt: horizon() });
       push(beats);
