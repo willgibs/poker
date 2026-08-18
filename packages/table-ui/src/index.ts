@@ -145,3 +145,56 @@ export type {
   TableHeaderProps,
 } from "./hero";
 /* ==== END hero ==== */
+
+/* ==== BEGIN stage — the felt, assembled (React) ==== */
+/* Geometry for the open plan + the Presenter wired to it. Styles:
+   `import "@poker/table-ui/stage.css"` after components.css and hero.css. */
+export {
+  BET_AXIS_FRACTION,
+  BOARD_ANCHOR,
+  DEALER_AXIS_DEGREES,
+  DEALER_AXIS_FRACTION,
+  DEALER_ORIGIN,
+  MAX_FRAME_MS,
+  POT_ANCHOR,
+  SEAT_SLOTS,
+  TableStage,
+  anchorTransform,
+  applyBeat,
+  applyBeats,
+  betAnchor,
+  dealerAnchor,
+  emptyStageView,
+  flightTransition,
+  flightsForBeat,
+  manualClock,
+  rafClock,
+  roundPct,
+  seatSlot,
+  seatSlots,
+  settleOrder,
+  slotClass,
+  toCardCode,
+  toCardCodes,
+  useStagePresenter,
+  viewFromStart,
+} from "./stage";
+export type {
+  FlightContext,
+  FlightKind,
+  FlightTransition,
+  ManualClock,
+  SeatIdentity,
+  StageActionState,
+  StageClock,
+  StageFlight,
+  StageHandle,
+  StageHero,
+  StagePoint,
+  StagePresenter,
+  StageSeat,
+  TableStageProps,
+  TableStageView,
+  UseStagePresenterOptions,
+} from "./stage";
+/* ==== END stage ==== */

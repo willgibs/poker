@@ -1,0 +1,16 @@
+{
+  "name": "@poker/sim",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": {
+    "@poker/analysis": "workspace:*",
+    "@poker/bots": "workspace:*",
+    "@poker/charts": "workspace:*",
+    "@poker/core": "workspace:*",
+    "@poker/engine": "workspace:*",
+    "@poker/eval": "workspace:*",
+    "@poker/history": "workspace:*",
+    "@poker/rng": "workspace:*"
+  }
+}

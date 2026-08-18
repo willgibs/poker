@@ -17,6 +17,7 @@
     "@poker/history": "workspace:*",
     "@poker/ranges": "workspace:*",
     "@poker/rng": "workspace:*",
+    "@poker/sim": "workspace:*",
     "@poker/table-ui": "workspace:*",
     "@poker/ui": "workspace:*",
     "@poker/workers": "workspace:*",

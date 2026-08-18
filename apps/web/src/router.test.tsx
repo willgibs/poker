@@ -66,7 +66,7 @@ describe("Home", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: /deal me in/i }));
 
-    expect(await screen.findByText(/the felt is warming up/i)).toBeInTheDocument();
+    expect(await screen.findByRole("group", { name: /table, four-handed to the turn/i })).toBeInTheDocument();
   });
 });
 
@@ -103,15 +103,80 @@ describe("nav rail", () => {
   });
 });
 
-describe("placeholder routes", () => {
-  it("mounts the /table felt placeholder", async () => {
+describe("/table — the felt", () => {
+  it("mounts table.html's scene: six seats, the turn, the pot", async () => {
     renderAt("/table");
-    expect(await screen.findByText(/the felt is warming up/i)).toBeInTheDocument();
+
+    expect(await screen.findByRole("group", { name: /table, four-handed to the turn/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "board: queen of hearts, seven of diamonds, two of clubs, king of diamonds" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: "Pot $18.40" })).toBeInTheDocument();
+    for (const name of ["Hero", "Barry", "Doris", "Rocco", "Priya", "Silas"]) {
+      expect(screen.getByRole("group", { name: new RegExp(`^${name}, \\$`) })).toBeInTheDocument();
+    }
   });
 
-  it("mounts the /replay/demo placeholder", async () => {
+  it("arms the action bar from the fixture's legal menu, one gradient only", async () => {
+    renderAt("/table");
+
+    expect(await screen.findByRole("button", { name: /^fold/i })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /call \$4\.60/i })).toBeEnabled();
+    const primary = screen.getAllByRole("button").filter((btn) => btn.dataset["variant"] === "primary");
+    expect(primary).toHaveLength(1);
+    expect(primary[0]).toHaveAccessibleName(/^raise/i);
+  });
+
+  it("holds the one coach line and the one price chip in the same strip", async () => {
+    renderAt("/table");
+
+    expect(await screen.findByText(/the king changes less than it looks/i)).toBeInTheDocument();
+    expect(document.querySelectorAll("[data-coach-slot]")).toHaveLength(1);
+    expect(screen.getByText("Call $4.60 · 3.4 : 1 · need 23%")).toBeInTheDocument();
+  });
+
+  it("keeps the header to its four slots", async () => {
+    renderAt("/table");
+    await screen.findByRole("group", { name: /table, four-handed to the turn/i });
+    expect(document.querySelectorAll("[data-header-slot]")).toHaveLength(4);
+  });
+});
+
+describe("/replay/demo — the golden hand", () => {
+  it("mounts the felt and the Presenter's controls", async () => {
     renderAt("/replay/demo");
-    expect(await screen.findByText(/a hand to study, soon/i)).toBeInTheDocument();
+
+    expect(await screen.findByRole("heading", { level: 1, name: /one hand, beat by beat/i })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: /replay table/i })).toBeInTheDocument();
+
+    const controls = screen.getByRole("group", { name: /replay controls/i });
+    expect(within(controls).getByRole("button", { name: /pause/i })).toBeInTheDocument();
+    expect(within(controls).getByRole("button", { name: /restart/i })).toBeInTheDocument();
+
+    const speeds = within(controls).getByRole("group", { name: /^speed$/i });
+    for (const label of ["0.5×", "1×", "2×", "3×", "Instant"]) {
+      expect(within(speeds).getByRole("button", { name: new RegExp(label.replace(".", "\\.")) })).toBeInTheDocument();
+    }
+  });
+
+  it("seats the cast the fixture's six seats map to", async () => {
+    renderAt("/replay/demo");
+    await screen.findByRole("group", { name: /replay table/i });
+
+    for (const name of ["Hero", "Barry", "Doris", "Hank", "Priya", "Silas"]) {
+      expect(screen.getByRole("group", { name: new RegExp(`^${name}, \\$`) })).toBeInTheDocument();
+    }
+  });
+
+  it("toggles between playing and paused", async () => {
+    renderAt("/replay/demo");
+    const controls = await screen.findByRole("group", { name: /replay controls/i });
+
+    expect(within(controls).getByRole("status")).toHaveTextContent("Playing");
+    fireEvent.click(within(controls).getByRole("button", { name: /pause/i }));
+    expect(within(controls).getByRole("status")).toHaveTextContent("Paused");
+    fireEvent.click(within(controls).getByRole("button", { name: /play/i }));
+    expect(within(controls).getByRole("status")).toHaveTextContent("Playing");
   });
 });
 

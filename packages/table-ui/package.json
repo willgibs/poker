@@ -5,7 +5,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./hero.css": "./src/hero/hero.css",
-    "./components.css": "./src/components/components.css"
+    "./components.css": "./src/components/components.css",
+    "./stage.css": "./src/stage/stage.css"
   },
   "dependencies": {
     "@poker/core": "workspace:*",

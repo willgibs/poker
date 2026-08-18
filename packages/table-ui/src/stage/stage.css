@@ -1,0 +1,355 @@
+/*
+ * The stage — geometry only.
+ *
+ * Normative spec: poker-internal/design/explorations/table.html (Study 1C, the
+ * open plan; Study 2, the density ladder; Study 3, the hero zone). Every number
+ * in the slot tables below is `geometry.ts`, and `stageCss.test.ts` proves it:
+ * the stylesheet is not allowed to hold a coordinate the module does not.
+ *
+ * Token law (docs/design-system.md): every colour, duration and easing here is
+ * a `var(--fr-*)` custom property; alpha is `color-mix()` against a token. The
+ * only bare numbers are coordinates — percentages of the felt box — because
+ * that is what this file *is*.
+ *
+ * Why the coordinates live in CSS at all: inline style objects are banned
+ * repo-wide (`local/no-inline-style-objects`), and rightly so. A seat's
+ * position is not a style decision anyway — it is a fixed anchor the player
+ * learns, identical for every hand at a density. So the ring is a stylesheet
+ * table keyed by slot, and the component only ever says *which slot*.
+ *
+ *   import "@poker/ui/tokens.css";
+ *   import "@poker/ui/components.css";
+ *   import "@poker/table-ui/components.css";
+ *   import "@poker/table-ui/hero.css";
+ *   import "@poker/table-ui/stage.css";
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Shell                                                                      */
+/* -------------------------------------------------------------------------- */
+
+.fr-stage {
+  /*
+   * Everything on the page that is *not* felt: the four-slot header above, the
+   * hero zone below, and the route's own padding. The felt takes what is left.
+   * A page with different chrome (the replay's intro and transport) overrides
+   * this one number — it is the whole fit-to-viewport contract.
+   */
+  --fr-stage-chrome-h: 320px;
+  --fr-stage-felt-h: max(300px, calc(100dvh - var(--fr-stage-chrome-h)));
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--fr-space-4);
+  width: 100%;
+  color: var(--fr-text);
+  font-family: var(--fr-font-body);
+}
+
+/*
+ * The felt's aspect ratio is fixed (16/10, components.css), so its height is
+ * its width — which means fitting it to the viewport is a *width* cap. Without
+ * one, a wide window pushes the action bar below the fold, and "no popups, no
+ * second screen" would be undone by a scrollbar.
+ */
+.fr-stage__felt {
+  flex: none;
+  max-width: calc(var(--fr-stage-felt-h) * 1.6);
+  margin-inline: auto;
+}
+
+/*
+ * The scene is the coordinate space: `cqw` / `cqh` inside it are percent of the
+ * felt, which is what makes a flight the same fraction of the table at every
+ * viewport without measuring a single element.
+ */
+.fr-stage__scene {
+  position: absolute;
+  inset: 0;
+  container-type: size;
+
+  /* The two anchors every other coordinate is derived from (table.html). */
+  --fr-pot-cx: 50;
+  --fr-pot-cy: 56;
+  --fr-board-cx: 50;
+  --fr-board-cy: 39;
+
+  /* PotDisplay reads these directly. */
+  --fr-pot-x: calc(var(--fr-pot-cx) * 1%);
+  --fr-pot-y: calc(var(--fr-pot-cy) * 1%);
+}
+
+.fr-stage__board {
+  position: absolute;
+  left: calc(var(--fr-board-cx) * 1%);
+  top: calc(var(--fr-board-cy) * 1%);
+  z-index: var(--fr-z-board);
+  transform: translate(-50%, -50%);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Anchors — one slot index in, three placements out                          */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Shared derivation. `--fr-slot-x` / `--fr-slot-y` come from the ring tables
+ * below; the bet axis is 35% of the way from the seat to the pot (Study 2, a
+ * locked anchor) and is computed here rather than tabulated, because it is a
+ * rule and not a placement. The button is tabulated: rotating a vector needs
+ * both axes at once, and x and y percentages resolve against different lengths.
+ */
+.fr-stage__anchor {
+  --fr-bet-x: calc((var(--fr-slot-x) + (var(--fr-pot-cx) - var(--fr-slot-x)) * 0.35) * 1%);
+  --fr-bet-y: calc((var(--fr-slot-y) + (var(--fr-pot-cy) - var(--fr-slot-y)) * 0.35) * 1%);
+}
+
+.fr-stage__seat {
+  position: absolute;
+  left: calc(var(--fr-slot-x) * 1%);
+  top: calc(var(--fr-slot-y) * 1%);
+  z-index: var(--fr-z-seat);
+  transform: translate(-50%, -50%);
+}
+
+/* Won the pot: the glow sweep rides the plate, never the cards. */
+.fr-stage__seat[data-winner="true"] .fr-seat__plate {
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--fr-glow) 70%, transparent),
+    0 6px 22px color-mix(in srgb, var(--fr-glow) 22%, transparent);
+}
+
+/* Revealed and lost: 70%, per beats.md §4.9. */
+.fr-stage__seat[data-dimmed="true"] .fr-seat__plate {
+  opacity: 0.7;
+}
+
+/*
+ * Hole cards sit above the plate, overlapped like a held hand — and *out of
+ * flow*, so that dealing two cards to a seat cannot push its plate (or its
+ * dealer button, or its bet chips) off the anchor the player has learned. The
+ * chair is a fixed point; the cards hang off it.
+ */
+.fr-stage__hole {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + var(--fr-space-1));
+  display: inline-flex;
+  align-items: flex-end;
+  transform: translateX(-50%);
+}
+
+.fr-stage__hole > .fr-card + .fr-card {
+  margin-left: calc(var(--fr-card-w, 24px) * -0.28);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Seat rings — geometry.ts, transcribed (percent of the felt box)            */
+/* -------------------------------------------------------------------------- */
+
+/* Heads-up · plate L */
+.fr-stage__scene[data-fr-density="2"] .fr-stage-slot-0 {
+  --fr-slot-x: 50;
+  --fr-slot-y: 80;
+  --fr-dealer-x: 52.4%;
+  --fr-dealer-y: 75.84%;
+}
+
+.fr-stage__scene[data-fr-density="2"] .fr-stage-slot-1 {
+  --fr-slot-x: 50;
+  --fr-slot-y: 11;
+  --fr-dealer-x: 45.5%;
+  --fr-dealer-y: 18.79%;
+}
+
+/* Six-max · plate M — the home density */
+.fr-stage__scene[data-fr-density="6"] .fr-stage-slot-0 {
+  --fr-slot-x: 50;
+  --fr-slot-y: 80;
+  --fr-dealer-x: 52.4%;
+  --fr-dealer-y: 75.84%;
+}
+
+.fr-stage__scene[data-fr-density="6"] .fr-stage-slot-1 {
+  --fr-slot-x: 8;
+  --fr-slot-y: 55;
+  --fr-dealer-x: 15.17%;
+  --fr-dealer-y: 59.37%;
+}
+
+.fr-stage__scene[data-fr-density="6"] .fr-stage-slot-2 {
+  --fr-slot-x: 23;
+  --fr-slot-y: 14;
+  --fr-dealer-x: 23.48%;
+  --fr-dealer-y: 23.97%;
+}
+
+.fr-stage__scene[data-fr-density="6"] .fr-stage-slot-3 {
+  --fr-slot-x: 50;
+  --fr-slot-y: 10;
+  --fr-dealer-x: 45.4%;
+  --fr-dealer-y: 17.97%;
+}
+
+.fr-stage__scene[data-fr-density="6"] .fr-stage-slot-4 {
+  --fr-slot-x: 77;
+  --fr-slot-y: 14;
+  --fr-dealer-x: 68.12%;
+  --fr-dealer-y: 18.57%;
+}
+
+.fr-stage__scene[data-fr-density="6"] .fr-stage-slot-5 {
+  --fr-slot-x: 92;
+  --fr-slot-y: 55;
+  --fr-dealer-x: 84.63%;
+  --fr-dealer-y: 50.97%;
+}
+
+/* Nine-max · plate S */
+.fr-stage__scene[data-fr-density="9"] .fr-stage-slot-0 {
+  --fr-slot-x: 50;
+  --fr-slot-y: 80;
+  --fr-dealer-x: 52.4%;
+  --fr-dealer-y: 75.84%;
+}
+
+.fr-stage__scene[data-fr-density="9"] .fr-stage-slot-1 {
+  --fr-slot-x: 13;
+  --fr-slot-y: 72;
+  --fr-dealer-x: 21.01%;
+  --fr-dealer-y: 72.93%;
+}
+
+.fr-stage__scene[data-fr-density="9"] .fr-stage-slot-2 {
+  --fr-slot-x: 4;
+  --fr-slot-y: 42;
+  --fr-dealer-x: 10.57%;
+  --fr-dealer-y: 49.02%;
+}
+
+.fr-stage__scene[data-fr-density="9"] .fr-stage-slot-3 {
+  --fr-slot-x: 16;
+  --fr-slot-y: 13;
+  --fr-dealer-x: 17.59%;
+  --fr-dealer-y: 23.85%;
+}
+
+.fr-stage__scene[data-fr-density="9"] .fr-stage-slot-4 {
+  --fr-slot-x: 38;
+  --fr-slot-y: 7;
+  --fr-dealer-x: 35.18%;
+  --fr-dealer-y: 16.69%;
+}
+
+.fr-stage__scene[data-fr-density="9"] .fr-stage-slot-5 {
+  --fr-slot-x: 63;
+  --fr-slot-y: 7;
+  --fr-dealer-x: 55.85%;
+  --fr-dealer-y: 14.19%;
+}
+
+.fr-stage__scene[data-fr-density="9"] .fr-stage-slot-6 {
+  --fr-slot-x: 85;
+  --fr-slot-y: 13;
+  --fr-dealer-x: 74.64%;
+  --fr-dealer-y: 16.95%;
+}
+
+.fr-stage__scene[data-fr-density="9"] .fr-stage-slot-7 {
+  --fr-slot-x: 96;
+  --fr-slot-y: 42;
+  --fr-dealer-x: 86.63%;
+  --fr-dealer-y: 39.82%;
+}
+
+.fr-stage__scene[data-fr-density="9"] .fr-stage-slot-8 {
+  --fr-slot-x: 87;
+  --fr-slot-y: 72;
+  --fr-dealer-x: 82.19%;
+  --fr-dealer-y: 65.53%;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Flights — the travelling half of a beat                                    */
+/* -------------------------------------------------------------------------- */
+
+.fr-stage__flights {
+  position: absolute;
+  inset: 0;
+  z-index: var(--fr-z-marker);
+  pointer-events: none;
+}
+
+/*
+ * A flight is placed entirely by its `transform` — the origin is the scene's
+ * top-left and the anchor arrives as container units, so the whole animation is
+ * one interpolable transform string (beats.md law #4: transform + opacity).
+ */
+.fr-stage__flight {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  will-change: transform, opacity;
+}
+
+/*
+ * A dealt card lands where it will *rest* — on the seat's cards, which sit
+ * above the plate — not on the plate itself. The seat ring is a single point,
+ * so the offset lives here, once, rather than as a second coordinate table.
+ */
+.fr-stage__flight--card {
+  margin-top: calc((var(--fr-seat-avatar, 26px) + var(--fr-space-3)) * -1);
+}
+
+.fr-stage__chip {
+  display: block;
+  width: 13px;
+  height: 13px;
+  border-radius: var(--fr-radius-circle);
+  background: radial-gradient(
+    circle at 35% 30%,
+    var(--fr-accent-b),
+    color-mix(in srgb, var(--fr-accent-b) 55%, var(--fr-ink-0))
+  );
+  box-shadow:
+    0 2px 0 color-mix(in srgb, var(--fr-accent-b) 40%, var(--fr-ink-0)),
+    inset 0 0 0 2.5px color-mix(in srgb, var(--fr-text) 18%, transparent);
+}
+
+/* The pot travels as a heavier stack than a single bet. */
+.fr-stage__flight--pot .fr-stage__chip {
+  width: 17px;
+  height: 17px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Hero zone                                                                  */
+/* -------------------------------------------------------------------------- */
+
+.fr-stage__hero {
+  display: flex;
+  justify-content: center;
+}
+
+.fr-stage__hero > .fr-hero {
+  flex: 1 1 auto;
+  max-width: var(--fr-stage-hero-max-w, 880px);
+}
+
+.fr-stage__whoami {
+  display: flex;
+  flex-direction: column;
+  line-height: var(--fr-line-height-tight);
+}
+
+.fr-stage__whoami-name {
+  color: var(--fr-text);
+  font-size: var(--fr-font-size-label-md);
+  font-weight: var(--fr-font-weight-semibold);
+}
+
+.fr-stage__whoami-stack {
+  color: var(--fr-muted);
+  font-size: var(--fr-font-size-label-sm);
+  font-variant-numeric: tabular-nums;
+}
