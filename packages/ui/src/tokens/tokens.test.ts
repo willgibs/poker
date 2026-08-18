@@ -112,15 +112,35 @@ describe("suits (L13)", () => {
   });
 });
 
-describe("felt (L16 — still open)", () => {
-  it("ships both candidates as tokens", () => {
-    expect(semantic.feltAchromatic).toBe("#0a0b0d");
-    expect(semantic.feltWhisperGreen).toBe("#090e0c");
-    expect(semantic.feltAchromatic).not.toBe(semantic.feltWhisperGreen);
+describe("felt (L17 — retired as default chrome)", () => {
+  it("no longer ships the L16 exploration candidates", () => {
+    expect(Object.hasOwn(semantic, "feltAchromatic")).toBe(false);
+    expect(Object.hasOwn(semantic, "feltWhisperGreen")).toBe(false);
+    expect(semanticTokenNames).not.toContain("feltAchromatic");
+    expect(semanticTokenNames).not.toContain("feltWhisperGreen");
   });
 
-  it("points the live felt at the achromatic placeholder pending the gate", () => {
-    expect(semantic.felt).toBe(semantic.feltAchromatic);
+  it("keeps the legacy felt pair only for the still-consuming component", () => {
+    expect(semantic.felt).toBe("#0a0b0d");
+    expect(semantic.felt1).toBe(semantic.felt);
+    expect(semantic.felt2).toBe(semantic.felt);
+  });
+});
+
+describe("Carbon sheet amendment (L18)", () => {
+  it("pins the two derived tokens", () => {
+    expect(semantic.lineHi).toBe("#3a3e45");
+    expect(semantic.sunk).toBe("#0a0b0d");
+  });
+
+  it("draws both from the ink ramp rather than restating them", () => {
+    expect(semantic.lineHi).toBe(ink[400]);
+    expect(semantic.sunk).toBe(ink[100]);
+  });
+
+  it("keeps sunk one step below surface and line-hi one step above line", () => {
+    expect(semantic.sunk).not.toBe(semantic.surface);
+    expect(semantic.lineHi).not.toBe(semantic.line);
   });
 });
 

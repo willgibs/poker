@@ -17,8 +17,13 @@
  *   - L13: suits are vivid, and the spade is TWO tokens, not a hue.
  *   - L3: gradients are dead as a system. The `accentA` / `accentB` pair
  *     survives only as a compatibility alias (see below).
- *   - L16: the felt is still open. Both candidate values ship as tokens; the
- *     live `felt` is a placeholder, not a decision.
+ *   - L17: L16 is resolved — no felt, no vignette. The play zone is pure
+ *     Carbon canvas, implied by layout and floating plates alone. The L16
+ *     exploration pair (`feltAchromatic` / `feltWhisperGreen`) is retired
+ *     outright; it does not return as a semantic default.
+ *   - L18: two tokens adopted onto the Carbon sheet — `lineHi` (hover edges,
+ *     card-back inner rule, alignment guides) and `sunk` (pressed-state
+ *     floor, one step below surface).
  */
 
 import { ink } from "./primitives";
@@ -31,8 +36,13 @@ export const semantic = {
   surface: ink[150],
   /** A surface lifted one step: seat plates, hover fills, inset chrome. */
   raised: ink[200],
+  /** Pressed-state floor, one step below surface (L18 amendment to L12). */
+  sunk: ink[100],
   /** The visible 1px edge. Structural, not decorative — L12. */
   line: ink[300],
+  /** Hover edges, card-back inner rule, alignment guides — one step brighter
+   * than `line` (L18 amendment to L12). */
+  lineHi: ink[400],
   /** The quieter divider: internal rules inside an already-bordered panel. */
   hairline: ink[250],
   /** Legacy name for `line`; the concept survives unchanged. */
@@ -78,16 +88,19 @@ export const semantic = {
 
   /* --- the table ------------------------------------------------------ */
   /**
-   * FELT IS OPEN (L16) — the achromatic/whisper-green/no-felt call is judged on
-   * the real table organism, together with the floating-stage question. Both
-   * candidates ship as tokens so the exploration is a one-line swap; `felt`
-   * points at the achromatic option as a PLACEHOLDER, not as a decision.
+   * FELT IS RETIRED AS DEFAULT CHROME (L17) — the L16 achromatic/whisper-green
+   * exploration is resolved: no felt, no vignette. The play zone is pure
+   * Carbon canvas, implied entirely by layout and the floating plates. The
+   * two L16 exploration candidates (`feltAchromatic` / `feltWhisperGreen`)
+   * are retired outright and no longer ship as semantic defaults.
+   *
+   * `felt` / `felt1` / `felt2` / `feltEdge` remain only because a component
+   * outside this package (table-ui's `.fr-felt`) still consumes them as of
+   * this ripple; they are legacy values pending that component's own L17
+   * pass, not a live design decision. Felt may return only as future
+   * cosmetic content, never as default chrome (L17).
    */
   felt: "#0a0b0d",
-  /** Candidate A — achromatic, one step off the canvas. Current placeholder. */
-  feltAchromatic: "#0a0b0d",
-  /** Candidate B — whisper green: a hue you feel rather than read. */
-  feltWhisperGreen: "#090e0c",
   /** The 1px edge that separates felt from what it sits on. */
   feltEdge: ink[250],
   /** Legacy felt pair. The Carbon felt is flat, so both ends are the same value. */

@@ -24,6 +24,9 @@ describe("kebab", () => {
     expect(kebab("offRecord")).toBe("off-record");
     expect(kebab("felt1")).toBe("felt1");
     expect(kebab("950")).toBe("950");
+    // L18: --line-hi / --sunk.
+    expect(kebab("lineHi")).toBe("line-hi");
+    expect(kebab("sunk")).toBe("sunk");
   });
 });
 

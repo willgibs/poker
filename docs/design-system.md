@@ -77,10 +77,18 @@ Primaries are **white**, not chromatic: `primary`/`onPrimary`/`primaryHover`/
 `primaryPress`, and one focus ring (`focus`, 2px with a 2px offset) for the whole
 system.
 
-**The felt is still open (L16).** Both candidates ship as tokens —
-`feltAchromatic` (#0a0b0d) and `feltWhisperGreen` (#090e0c) — and `felt` points
-at the achromatic one as a *placeholder*, not a decision. The felt and the
-floating-stage question are answered together, on the real table at scale.
+**The felt is retired as default chrome (L17).** The L16 achromatic/whisper-green
+exploration is resolved: no felt, no vignette — the play zone is pure Carbon
+canvas, implied entirely by layout and the floating plates (a hairline plus one
+surface step, zero glow/shadow theatrics). The L16 candidate pair
+(`feltAchromatic` / `feltWhisperGreen`) no longer ships as a semantic default.
+`felt`/`felt1`/`felt2`/`feltEdge` remain only as legacy values for a component
+outside `packages/ui` that still consumes them; felt may return only as future
+cosmetic content, never as default chrome.
+
+**L18** adopts two derived tokens onto the Carbon sheet: `lineHi` (#3a3e45 —
+hover edges, card-back inner rule, alignment guides) and `sunk` (#0a0b0d —
+pressed-state floor, one step below `surface`).
 
 Semantic tokens carry compatibility aliases on the same terms as the primitives:
 `edge` → `line`, `muted` → `dim`, `suitS` → `suitSpadeFace`, `felt1`/`felt2` →
