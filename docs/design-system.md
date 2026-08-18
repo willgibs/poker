@@ -161,22 +161,38 @@ cssVar("suit-h", "#f04a37");       // "var(--fr-suit-h, #f04a37)" — offscreen 
 
 ## Fonts
 
-General Sans is the voice (L9), self-hosted and imported alongside the tokens:
+General Sans is the voice (L9); Geist Mono is `fontFamily.mono` — both
+self-hosted and imported alongside the tokens:
 
 ```ts
 import "@poker/ui/fonts.css";   // packages/ui/src/fonts.gen.css
 import "@poker/ui/tokens.css";
 ```
 
-`fonts.gen.css` is copied verbatim from the Gate 0 kit
-(`poker-internal/design/gates/gate0/fonts/fonts.css`) — two `@font-face` blocks,
-weights 400 and 600, each inlined as a base64 woff2 data URI so the sheet issues
-no network request and needs no CSP allowance. **These are ASCII subsets**
-(U+0020-007E plus curly quotes, en/em dashes, ellipsis); arbitrary user-entered
-or non-Latin text falls through to the system stack. The full character-set
-files land at Gate 5. `packages/ui/src/fonts.test.ts` guards all of it — face
-count, weights, data-URI-only sources, and that `fontWeight` never asks for a
-weight the kit cannot draw.
+`fonts.gen.css` carries two kits, each copied verbatim from its own source:
+
+- **General Sans**, from the Gate 0 kit
+  (`poker-internal/design/gates/gate0/fonts/fonts.css`) — two `@font-face`
+  blocks, weights 400 and 600. **These are ASCII subsets**
+  (U+0020-007E plus curly quotes, en/em dashes, ellipsis); arbitrary
+  user-entered or non-Latin text falls through to the system stack. The full
+  character-set files land at Gate 5.
+- **Geist Mono**, from `poker-internal/design/fonts/geist-mono/geist-mono-faces.css`
+  — two more `@font-face` blocks, weights 400 and 600. **This is a
+  numerals-only subset, not an ASCII one**: digits, the punctuation a
+  formatted stake/pot/bb/ratio figure needs (`$ % ( ) + , - . / :`), the
+  literal letter `b` (`formatBb`'s `"12.3bb"`), and the true minus U+2212.
+  It cannot set prose or labels — anything beyond a numeric figure falls
+  through to the mono system stack that `fontFamily.mono` still lists as
+  fallback. See that directory's `manifest.md` for full provenance
+  (`vercel/geist-font`, pinned commit, SIL OFL 1.1 license note).
+
+All four faces are inlined as base64 woff2 data URIs, so the sheet issues no
+network request and needs no CSP allowance. `packages/ui/src/fonts.test.ts`
+guards all of it — face count (4), family/weight pairing, data-URI-only
+sources, the ASCII-subset warning on General Sans, the numerals-only warning
+on Geist Mono, and that `fontWeight` never asks for a weight the kit cannot
+draw.
 
 ## Beat tokens: the pointer to the Presenter
 
