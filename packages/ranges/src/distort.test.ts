@@ -202,6 +202,47 @@ describe("aggressionTransfer", () => {
     expect(aggressive.every((w) => w === 1)).toBe(true);
     expect(passive.every((w) => w === 1)).toBe(true); // nothing could move
   });
+
+  it("is monotone in transfer: total aggressive mass rises as transfer rises (property)", () => {
+    fc.assert(
+      fc.property(
+        seedArb,
+        fc.double({ min: -1, max: 1, noNaN: true }),
+        fc.double({ min: -1, max: 1, noNaN: true }),
+        (seed, t1, t2) => {
+          const lo = Math.min(t1, t2);
+          const hi = Math.max(t1, t2);
+          const { p, a } = branchPair(seed);
+          const totalMass = total(p) + total(a); // conserved regardless of t
+          const rLo = aggressionTransfer(p, a, lo);
+          const rHi = aggressionTransfer(p, a, hi);
+          expectClose(total(rLo.passive) + total(rLo.aggressive), totalMass, 1e-2);
+          expectClose(total(rHi.passive) + total(rHi.aggressive), totalMass, 1e-2);
+          expect(total(rHi.aggressive)).toBeGreaterThanOrEqual(total(rLo.aggressive) - 1e-3);
+        },
+      ),
+    );
+  });
+
+  it("preserves normalization: a branch pair that starts summed to 1 stays summed to 1", () => {
+    fc.assert(
+      fc.property(seedArb, fc.double({ min: -1, max: 1, noNaN: true }), (seed, t) => {
+        const { p, a } = branchPair(seed);
+        // Rescale the pair jointly so passive+aggressive is a normalized
+        // distribution over the two branches (total mass exactly 1).
+        const mass = total(p) + total(a);
+        if (mass <= 0) return; // degenerate all-zero draw, nothing to normalize
+        const inv = 1 / mass;
+        for (let i = 0; i < COMBO_COUNT; i++) {
+          p[i] = (p[i] as number) * inv;
+          a[i] = (a[i] as number) * inv;
+        }
+        expectClose(total(p) + total(a), 1, 1e-3);
+        const { passive, aggressive } = aggressionTransfer(p, a, t);
+        expectClose(total(passive) + total(aggressive), 1, 1e-3); // still normalized
+      }),
+    );
+  });
 });
 
 describe("polarize", () => {
@@ -247,5 +288,87 @@ describe("polarize", () => {
     }
     expect(() => polarize(createRange(), 1, R, 0)).toThrow(RangeError);
     expect(() => polarize(createRange(), 1, R, 1.5)).toThrow(RangeError);
+  });
+
+  it("is monotone in bluffWeight: more bluff weight never lowers a combo's weight (property)", () => {
+    fc.assert(
+      fc.property(seedArb, unitArb, unitArb, (seed, b1, b2) => {
+        const lo = Math.min(b1, b2);
+        const hi = Math.max(b1, b2);
+        const r = pseudoRange(seed);
+        const pLo = polarize(r, lo, R);
+        const pHi = polarize(r, hi, R);
+        expectUnitInterval(pLo);
+        expectUnitInterval(pHi);
+        for (let i = 0; i < COMBO_COUNT; i++) {
+          expect(pHi[i]!).toBeGreaterThanOrEqual(pLo[i]! - 1e-7);
+        }
+        expect(total(pHi)).toBeGreaterThanOrEqual(total(pLo) - 1e-3);
+      }),
+    );
+  });
+});
+
+describe("input validation", () => {
+  it("rejects out-of-domain parameters on every distortion op", () => {
+    const r = pseudoRange(1);
+    expect(() => topPercentByRanking(-0.1, R)).toThrow(RangeError);
+    expect(() => topPercentByRanking(1.1, R)).toThrow(RangeError);
+    expect(() => topPercentByRanking(0.5, R, -0.01)).toThrow(RangeError);
+    expect(() => topPercentByRanking(0.5, R, 0.51)).toThrow(RangeError);
+    expect(() => topPercentByRanking(0.5, R, Number.NaN)).toThrow(RangeError);
+
+    expect(() => tighten(r, -0.1, R)).toThrow(RangeError);
+    expect(() => tighten(r, 1.1, R)).toThrow(RangeError);
+    expect(() => tighten(r, Number.NaN, R)).toThrow(RangeError);
+
+    expect(() => aggressionTransfer(r, r, -1.1)).toThrow(RangeError);
+    expect(() => aggressionTransfer(r, r, 1.1)).toThrow(RangeError);
+    expect(() => aggressionTransfer(r, r, Number.NaN)).toThrow(RangeError);
+
+    expect(() => polarize(r, -0.1, R)).toThrow(RangeError);
+    expect(() => polarize(r, 1.1, R)).toThrow(RangeError);
+    expect(() => polarize(r, Number.NaN, R)).toThrow(RangeError);
+  });
+
+  it("rejects malformed range/ranking arguments", () => {
+    const bad = new Float32Array(5);
+    const full = fullRange();
+    expect(() => tighten(bad, 0.5, R)).toThrow(RangeError);
+    expect(() => aggressionTransfer(bad, full, 0.5)).toThrow(RangeError);
+    expect(() => aggressionTransfer(full, bad, 0.5)).toThrow(RangeError);
+    expect(() => polarize(bad, 0.5, R)).toThrow(RangeError);
+
+    const shortRanking = new Uint16Array(10);
+    expect(() => topPercentByRanking(0.5, shortRanking)).toThrow(RangeError);
+    expect(() => tighten(full, 0.5, shortRanking)).toThrow(RangeError);
+    expect(() => polarize(full, 0.5, shortRanking)).toThrow(RangeError);
+  });
+});
+
+describe("determinism", () => {
+  it("independent calls with identical inputs produce bit-identical output", () => {
+    const r = pseudoRange(55);
+    const { p, a } = (() => {
+      const next = lcg(66);
+      const pp = createRange();
+      const aa = createRange();
+      for (let i = 0; i < COMBO_COUNT; i++) {
+        const u = next();
+        const v = next();
+        pp[i] = u * v;
+        aa[i] = (1 - u) * v;
+      }
+      return { p: pp, a: aa };
+    })();
+
+    expect(Array.from(topPercentByRanking(0.3, R))).toEqual(Array.from(topPercentByRanking(0.3, R)));
+    expect(Array.from(tighten(r, 0.4, R))).toEqual(Array.from(tighten(r, 0.4, R)));
+    expect(Array.from(polarize(r, 0.2, R))).toEqual(Array.from(polarize(r, 0.2, R)));
+
+    const run1 = aggressionTransfer(p, a, 0.25);
+    const run2 = aggressionTransfer(p, a, 0.25);
+    expect(Array.from(run1.passive)).toEqual(Array.from(run2.passive));
+    expect(Array.from(run1.aggressive)).toEqual(Array.from(run2.aggressive));
   });
 });

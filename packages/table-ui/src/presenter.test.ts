@@ -25,6 +25,24 @@ function harness(config: { onBeat: (event: BeatEvent) => void; guard?: number })
   });
 }
 
+/** A single blocking filler beat of exact `duration`, for pinning the backlog to a precise value. */
+function fillerBeat(duration: number): Beat {
+  return {
+    at: 0,
+    duration,
+    lane: "dealer",
+    speedClass: "paced",
+    group: "filler",
+    blocking: true,
+    keepsTrace: false,
+    transforms: [],
+    reduceMotion: "unchanged",
+    sounds: [],
+    kind: "rest",
+    meta: { reason: "auto-deal" },
+  };
+}
+
 describe("playback", () => {
   it("emits start → cue → settle per beat, in time order", () => {
     const rec = recorder();
@@ -214,6 +232,94 @@ describe("flush — the interrupt policy (beats.md §5.3)", () => {
     expect(rec.events).toEqual([]);
     expect(presenter.pending()).toBe(0);
   });
+
+  it("flushing after ticking past the full horizon is a no-op — everything already settled itself", () => {
+    const rec = recorder();
+    const presenter = harness(rec);
+    presenter.enqueue(SCRIPTED_HAND, OPTS);
+    presenter.tick(presenter.horizon());
+    expect(presenter.pending()).toBe(0);
+    const before = rec.events.length;
+    presenter.flush();
+    expect(rec.events).toHaveLength(before);
+    expect(rec.events.every((e) => e.flushed === false)).toBe(true);
+  });
+
+  it("lands on the same settled state as full playback when driven by an injected mutable clock, not tick(dt) (property)", () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 0x7fffffff }),
+        fc.constantFrom<Speed>(0.5, 1, 2, 3, "instant"),
+        fc.boolean(),
+        fc.integer({ min: 0, max: 0x7fffffff }),
+        (seed, speed, reduceMotion, interruptSeed) => {
+          const events = randomHand(seed);
+          const opts = { speed, reduceMotion, heroSeat: 0 };
+
+          // Uninterrupted playback, driven purely by sampling an injected `now()`.
+          let clockA = 0;
+          const full = projectionRecorder();
+          const a = createPresenter({ onBeat: full.onBeat, now: () => clockA });
+          a.enqueue(events, opts);
+          clockA = a.horizon() + 1;
+          a.tick(); // no delta: samples now()
+
+          // Interrupted at a random frame via the same now()-sampling style, then flushed.
+          let clockB = 0;
+          const cut = projectionRecorder();
+          const b = createPresenter({ onBeat: cut.onBeat, now: () => clockB });
+          const beats = b.enqueue(events, opts);
+          const span = Math.max(1, ...beats.map(beatEnd));
+          clockB = Math.floor(lcg(interruptSeed)() * span);
+          b.tick();
+          b.flush();
+
+          expect(cut.projection).toEqual(full.projection);
+          expect(b.pending()).toBe(0);
+        },
+      ),
+      { numRuns: 300 },
+    );
+  });
+
+  it("interrupts and flushes correctly across two interleaved bursts on an injected clock (property)", () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 0x7fffffff }),
+        fc.integer({ min: 0, max: 0x7fffffff }),
+        fc.constantFrom<Speed>(0.5, 1, 2, 3, "instant"),
+        fc.integer({ min: 0, max: 0x7fffffff }),
+        (seedA, seedB, speed, interruptSeed) => {
+          const eventsA = randomHand(seedA);
+          const eventsB = randomHand(seedB >>> 1);
+          const opts = { speed, reduceMotion: false, heroSeat: 0 };
+
+          const full = projectionRecorder();
+          let clockFull = 0;
+          const p1 = createPresenter({ onBeat: full.onBeat, now: () => clockFull });
+          p1.enqueue(eventsA, opts);
+          clockFull = Math.floor(lcg(interruptSeed)() * (p1.horizon() + 1));
+          p1.tick();
+          p1.enqueue(eventsB, opts);
+          clockFull = p1.horizon() + 1;
+          p1.tick();
+
+          const cut = projectionRecorder();
+          let clockCut = 0;
+          const p2 = createPresenter({ onBeat: cut.onBeat, now: () => clockCut });
+          p2.enqueue(eventsA, opts);
+          clockCut = Math.floor(lcg(interruptSeed)() * (p2.horizon() + 1));
+          p2.tick();
+          p2.enqueue(eventsB, opts);
+          p2.flush();
+
+          expect(cut.projection).toEqual(full.projection);
+          expect(p2.pending()).toBe(0);
+        },
+      ),
+      { numRuns: 200 },
+    );
+  });
 });
 
 describe("enqueue during playback", () => {
@@ -284,6 +390,123 @@ describe("enqueue during playback", () => {
     presenter.enqueue(SCRIPTED_HAND, OPTS);
     const second = presenter.enqueue(SCRIPTED_HAND, OPTS);
     expect(second.filter((b) => b.kind === "deal-hole")).toHaveLength(12);
+  });
+
+  it("does not escalate when the backlog sits exactly at the guard (boundary is strict >)", () => {
+    const rec = recorder();
+    const presenter = harness({ onBeat: rec.onBeat, guard: 1500 });
+    presenter.enqueueBeats([fillerBeat(1500)], "now");
+    expect(presenter.horizon() - presenter.time()).toBe(1500);
+    const second = presenter.enqueue(SCRIPTED_HAND, OPTS);
+    // Untouched: two passes, one beat per card, same as an unguarded 1x schedule.
+    expect(second.filter((b) => b.kind === "deal-hole")).toHaveLength(12);
+  });
+
+  it("escalates once the backlog is even 1ms past the guard", () => {
+    const rec = recorder();
+    const presenter = harness({ onBeat: rec.onBeat, guard: 1500 });
+    presenter.enqueueBeats([fillerBeat(1501)], "now");
+    const second = presenter.enqueue(SCRIPTED_HAND, OPTS);
+    expect(second.filter((b) => b.kind === "deal-hole").every((b) => b.kind === "deal-hole" && b.meta.pass !== 1)).toBe(
+      true,
+    );
+  });
+
+  it("honours a custom (non-default) guard value", () => {
+    const rec = recorder();
+    const presenter = harness({ onBeat: rec.onBeat, guard: 300 });
+    presenter.enqueueBeats([fillerBeat(400)], "now"); // over a 300ms guard, under the 1500ms default
+    const second = presenter.enqueue(SCRIPTED_HAND, OPTS);
+    expect(second.filter((b) => b.kind === "deal-hole").length).toBeLessThan(12);
+  });
+
+  it("stops escalating once ticking shrinks the backlog back under the guard", () => {
+    const rec = recorder();
+    const presenter = harness({ onBeat: rec.onBeat, guard: 300 });
+    presenter.enqueueBeats([fillerBeat(2000)], "now");
+    presenter.tick(1800); // 200ms of backlog left — under the 300ms guard
+    expect(presenter.horizon() - presenter.time()).toBe(200);
+    const second = presenter.enqueue(SCRIPTED_HAND, OPTS);
+    expect(second.filter((b) => b.kind === "deal-hole")).toHaveLength(12);
+  });
+
+  it("an escalated enqueue never rewrites the beats an earlier enqueue already queued", () => {
+    const rec = recorder();
+    const presenter = harness({ onBeat: rec.onBeat, guard: 1500 });
+    const first = presenter.enqueue(SCRIPTED_HAND, OPTS); // backlog now far over the guard
+    const firstSnapshot = first.map((b) => ({ at: b.at, duration: b.duration, kind: b.kind }));
+    presenter.enqueue(SCRIPTED_HAND, OPTS); // triggers the guard for the *second* burst only
+    expect(first.map((b) => ({ at: b.at, duration: b.duration, kind: b.kind }))).toEqual(firstSnapshot);
+    expect(presenter.queued().filter((b) => first.includes(b))).toHaveLength(first.length);
+  });
+
+  // BUG (beats.md §3 / PresenterConfig.backlogGuardMs doc comment): both say an
+  // over-guard enqueue "escalates *a* compression tier" / "the next compression
+  // tier" (singular step). The implementation's `while (horizon() - clock >
+  // guard && speed !== "instant") speed = nextSpeedTier(speed);` loop instead
+  // runs to exhaustion every time, because nothing inside the loop body changes
+  // `horizon()` or `clock` — escalating `speed` only affects the *new* schedule
+  // about to be built, which is not pushed until after the loop. So the loop
+  // condition is invariant across iterations: a backlog 1ms over the guard and
+  // a backlog 100 seconds over the guard both collapse the very next enqueue
+  // straight to "instant", in a single call, rather than moving up one tier at
+  // a time as the queue catches up. Verified directly: enqueueing a 1501ms
+  // filler beat (1ms over a 1500ms guard) and a 101_500ms filler beat produce
+  // byte-identical single-grouped, zero-duration deal-hole output on the next
+  // enqueue. Skipped because it encodes the documented/intended behavior, which
+  // the current code does not implement.
+  it.skip("escalates by only the next compression tier when barely over the guard, not straight to instant", () => {
+    const rec = recorder();
+    const presenter = harness({ onBeat: rec.onBeat, guard: 1500 });
+    presenter.enqueueBeats([fillerBeat(1501)], "now"); // barely over the guard
+    const second = presenter.enqueue(SCRIPTED_HAND, OPTS); // opts.speed is 1x
+    // One tier up from 1x is 2x (tier 1): merged per-seat sprites, not a single
+    // grouped beat for the whole deal.
+    const deal = second.filter((b) => b.kind === "deal-hole");
+    expect(deal).toHaveLength(6); // SCRIPTED_HAND deals 6 seats; tier 1 = one merged beat per seat
+    expect(deal.every((b) => b.kind === "deal-hole" && b.meta.pass === "merged" && !b.meta.grouped)).toBe(true);
+  });
+});
+
+describe("speed changes apply only to the next unstarted beat (beats.md §3)", () => {
+  it("a later enqueue at a different speed leaves an earlier burst's queued beats untouched", () => {
+    const rec = recorder();
+    const presenter = harness(rec);
+    const first = presenter.enqueue(SCRIPTED_HAND, OPTS); // 1x
+    presenter.tick(300); // some beats started/settled, most still pending
+    const stillPendingBefore = presenter.queued().filter((b) => first.includes(b));
+    expect(stillPendingBefore.length).toBeGreaterThan(0);
+
+    const instantOpts = { ...OPTS, speed: "instant" as const };
+    const second = presenter.enqueue(SCRIPTED_HAND, instantOpts);
+
+    // The first burst's still-pending beats are exactly as they were queued —
+    // 1x durations, untouched by the second burst's "instant" speed.
+    const stillPendingAfter = presenter.queued().filter((b) => first.includes(b));
+    expect(stillPendingAfter).toEqual(stillPendingBefore);
+    expect(stillPendingAfter.some((b) => b.duration > 0)).toBe(true);
+
+    // The second burst is fully governed by its own (instant) speed.
+    expect(second.every((b) => b.keepsTrace || b.lane === "ambient" || b.duration === 0)).toBe(true);
+    expect(second.some((b) => b.duration === 0)).toBe(true);
+  });
+
+  it("an in-flight beat settles at its originally launched duration, unaffected by a later enqueue", () => {
+    const rec = recorder();
+    const presenter = harness(rec);
+    const events: HandEvent[] = [{ t: "act", seat: 2, kind: "bet", amount: 300 }];
+    const [beat] = presenter.enqueue(events, OPTS);
+    const settleAt = (beat?.at ?? 0) + (beat?.duration ?? 0);
+    presenter.tick((beat?.at ?? 0) + 1); // started, mid-flight, not yet settled
+
+    // A second burst arrives at a wildly different speed while the first is airborne.
+    presenter.enqueue(events, { ...OPTS, speed: "instant" });
+
+    presenter.seek(settleAt); // advance to the first beat's *original* settle time
+    const settled = rec.events.find((e) => e.phase === "settle" && e.beat === beat);
+    expect(settled).toBeDefined();
+    expect(settled?.at).toBe(settleAt);
+    expect(settled?.flushed).toBe(false);
   });
 });
 

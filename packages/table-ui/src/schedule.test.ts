@@ -1,10 +1,21 @@
+import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import type { HandEvent } from "@poker/history";
 import type { Beat, BeatKind, BeatOf } from "./beats";
 import { hasTranslation } from "./beats";
 import { schedule, scheduleBadgeGlint, scheduleBanter, scheduleMoodShift, scheduleThink, thinkDuration } from "./schedule";
-import { DURATION, SPEEDS, THINK_FLOOR_MS, resolveDuration, resolveStagger, type Speed } from "./tokens";
-import { SCRIPTED_HAND, SCRIPTED_HERO, card } from "./test-helpers";
+import {
+  DURATION,
+  SPEEDS,
+  THINK_FLOOR_MS,
+  compressionTier,
+  isInstant,
+  nextSpeedTier,
+  resolveDuration,
+  resolveStagger,
+  type Speed,
+} from "./tokens";
+import { SCRIPTED_HAND, SCRIPTED_HERO, card, randomHand } from "./test-helpers";
 
 function opts(speed: Speed, reduceMotion = false): { speed: Speed; reduceMotion: boolean; heroSeat: number } {
   return { speed, reduceMotion, heroSeat: SCRIPTED_HERO };
@@ -40,6 +51,76 @@ describe("token law", () => {
   it("keeps staggers but halves/zeroes them per tier", () => {
     expect(SPEEDS.map((s) => resolveStagger(DURATION.stagger, s))).toEqual([80, 40, 20, 0, 0]);
   });
+
+  it("rounds the 2x stagger half-up for an odd base", () => {
+    expect(resolveStagger(61, 2)).toBe(31); // 30.5 -> 31
+    expect(resolveStagger(63, 2)).toBe(32); // 31.5 -> 32
+    expect(resolveStagger(60, 2)).toBe(30); // exact half already
+  });
+
+  it("resolveStagger property: 0.5x doubles, 1x is base, 2x halves+rounds, 3x/instant are simultaneous", () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 0, max: 10_000 }), (base) => {
+        expect(resolveStagger(base, 0.5)).toBe(base * 2);
+        expect(resolveStagger(base, 1)).toBe(base);
+        expect(resolveStagger(base, 2)).toBe(Math.round(base / 2));
+        expect(resolveStagger(base, 3)).toBe(0);
+        expect(resolveStagger(base, "instant")).toBe(0);
+      }),
+    );
+  });
+
+  it("swaps in rmBase under reduce-motion, and the clamp ceiling follows rmBase too", () => {
+    const spec = { base: 220, floor: 90, rmBase: 150 };
+    expect(resolveDuration(spec, 1, true)).toBe(150); // rmBase, not base
+    expect(resolveDuration(spec, 0.5, true)).toBe(300); // ceiling is 2x *rmBase*
+    expect(resolveDuration(spec, 0.5, false)).toBe(440); // non-RM ceiling is 2x base, unaffected
+  });
+
+  it("falls back to base under reduce-motion when no rmBase is declared", () => {
+    const spec = { base: 220, floor: 90 };
+    expect(resolveDuration(spec, 1, true)).toBe(220);
+  });
+
+  it("ignores an explicit at2x override under reduce-motion, using the rmBase clamp instead", () => {
+    const spec = { base: 400, floor: 90, at2x: 160, rmBase: 200 };
+    expect(resolveDuration(spec, 2, false)).toBe(160); // the override applies without RM
+    expect(resolveDuration(spec, 2, true)).toBe(100); // RM: round(rmBase / 2), override skipped
+  });
+
+  it("collapse3x (default true) floors at 3x regardless of reduce-motion or rmBase", () => {
+    const spec = { base: 220, floor: 90, rmBase: 150 };
+    expect(resolveDuration(spec, 3, false)).toBe(90);
+    expect(resolveDuration(spec, 3, true)).toBe(90);
+  });
+
+  it("collapse3x: false clamps at 3x from (rm)base/3 instead of flooring", () => {
+    const spec = { base: 220, floor: 20, rmBase: 150, collapse3x: false };
+    expect(resolveDuration(spec, 3, false)).toBe(73); // round(220 / 3)
+    expect(resolveDuration(spec, 3, true)).toBe(50); // round(150 / 3), rmBase applies here too
+  });
+
+  it("atInstant is the same with or without reduce-motion — instant resolves before the RM branch", () => {
+    const spec = { base: 220, floor: 90, rmBase: 150, atInstant: 120 };
+    expect(resolveDuration(spec, "instant", true)).toBe(120);
+    expect(resolveDuration(spec, "instant", false)).toBe(120);
+  });
+
+  it("maps speed to its compression tier (beats.md §3)", () => {
+    expect(SPEEDS.map(compressionTier)).toEqual([0, 0, 1, 2, 3]);
+  });
+
+  it("walks the speed ladder one rung at a time, terminating at instant", () => {
+    expect(nextSpeedTier(0.5)).toBe(1);
+    expect(nextSpeedTier(1)).toBe(2);
+    expect(nextSpeedTier(2)).toBe(3);
+    expect(nextSpeedTier(3)).toBe("instant");
+    expect(nextSpeedTier("instant")).toBe("instant"); // terminal
+  });
+
+  it("isInstant is true only for the instant speed", () => {
+    expect(SPEEDS.map(isInstant)).toEqual([false, false, false, false, true]);
+  });
 });
 
 describe("deal hole", () => {
@@ -50,6 +131,13 @@ describe("deal hole", () => {
     expect(beats.map((b) => b.meta.pass)).toEqual([1, 1, 1, 2, 2, 2]);
     expect(beats.every((b) => b.duration === 220)).toBe(true);
     expect(beats.every((b) => b.meta.deliveries[0]?.cards.length === 1)).toBe(true);
+  });
+
+  it("doubles the stagger and hits the clamp ceiling at 0.5x", () => {
+    const beats = of(schedule(DEAL_ONLY, opts(0.5)), "deal-hole");
+    expect(beats).toHaveLength(6);
+    expect(beats.map((b) => b.at)).toEqual([0, 80, 160, 240, 320, 400]); // 40ms stagger doubled
+    expect(beats.every((b) => b.duration === 440)).toBe(true); // the clamp ceiling (2x base)
   });
 
   it("merges to one two-card sprite per seat at 2x (tier 1)", () => {
@@ -294,6 +382,13 @@ describe("showdown", () => {
     expect(reveal[0]?.duration).toBe(120);
   });
 
+  it("doubles the seat stagger and hits the clamp ceiling at 0.5x", () => {
+    const perSeat = of(schedule(SCRIPTED_HAND, opts(0.5)), "reveal").filter((b) => b.meta.source === "showdown");
+    expect(perSeat).toHaveLength(2);
+    expect((perSeat[1]?.at ?? 0) - (perSeat[0]?.at ?? 0)).toBe(300); // 150ms stagger doubled
+    expect(perSeat.every((b) => b.duration === 500)).toBe(true); // clamp ceiling: 2x the 250ms base
+  });
+
   it("glows the winner 300ms after the last flip and dims the rest", () => {
     const beats = schedule(SCRIPTED_HAND, opts(1));
     const flips = of(beats, "reveal").filter((b) => b.meta.source === "showdown");
@@ -447,6 +542,33 @@ describe("instant", () => {
   it("keeps exactly three cues per hand: deal, showdown, award", () => {
     const cues = schedule(SCRIPTED_HAND, opts("instant")).flatMap((b) => b.sounds.map((s) => s.cue));
     expect(cues).toEqual(["card_slide", "card_flip", "pot_slide"]);
+  });
+
+  it("names exactly which kinds survive instant, and why (keepsTrace vs. ambient lane)", () => {
+    const beats = schedule(SCRIPTED_HAND, opts("instant"));
+    const survivors = beats.filter((b) => b.duration > 0);
+    // Every survivor in this hand is either a keeps-a-trace beat (showdown
+    // reveal, pot award) or the ambient mind-reveal affordance — nothing else.
+    expect(survivors.map((b) => `${b.kind}:${b.keepsTrace ? "trace" : b.lane}`).sort()).toEqual(
+      ["mind-affordance:ambient", "pot-award:trace", "reveal:trace"].sort(),
+    );
+    // Every non-survivor is neither a trace beat nor ambient.
+    const snapped = beats.filter((b) => b.duration === 0);
+    expect(snapped.every((b) => !b.keepsTrace && b.lane !== "ambient")).toBe(true);
+    expect(snapped.length).toBeGreaterThan(0);
+  });
+
+  it("property: at instant, a beat has nonzero duration iff it keeps a trace or lives in the ambient lane", () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 0, max: 0x7fffffff }), (seed) => {
+        const beats = schedule(randomHand(seed), { speed: "instant", reduceMotion: false, heroSeat: 0 });
+        for (const beat of beats) {
+          const survives = beat.keepsTrace || beat.lane === "ambient";
+          expect(beat.duration > 0 ? survives : true).toBe(true);
+        }
+      }),
+      { numRuns: 300 },
+    );
   });
 });
 
