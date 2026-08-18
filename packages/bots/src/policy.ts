@@ -53,7 +53,7 @@ export const DEFAULT_POLICY_PARAMS: PolicyParams = {
 };
 
 /** Epsilon floor handed to `@poker/ranges`' Bayesian filter. */
-export const LIKELIHOOD_FLOOR = 0.02;
+export const LIKELIHOOD_FLOOR = 0.12;
 
 function clamp01(x: number): number {
   return x < 0 ? 0 : x > 1 ? 1 : x;
@@ -145,10 +145,39 @@ function sizeTerm(sizeFraction: number): number {
  * The threshold rises with bet size — pot odds — and falls with call-down
  * tendency, which is precisely what makes Barry (0.97) a station and Priya
  * (0.22) an over-folder using one shared curve.
+ *
+ * The size coefficient is calibrated against real continuance: a neutral actor
+ * continues against roughly 55% of a third-pot bet, 46% of a half-pot bet, 34%
+ * of a pot bet and 20% of a 3x-the-big-blind open. Understating it is not a
+ * small error — it tells every bot the table calls an open a third of the
+ * time, which prices opening as a losing play and leaves the whole cast
+ * limping.
  */
 export function continuationOf(s: number, p: PolicyParams, sizeFraction: number): number {
-  const mid = 0.42 + 0.3 * sizeTerm(sizeFraction) - 0.34 * p.callDownTendency + 0.12 * p.tightness;
+  const mid = 0.42 + 0.45 * sizeTerm(sizeFraction) - 0.34 * p.callDownTendency + 0.12 * p.tightness;
   return clamp01(logistic(s, mid, 8));
+}
+
+/**
+ * How often the actor answers a bet of `sizeFraction` pot with a RAISE,
+ * holding a combo at strength `s`.
+ *
+ * Deliberately NOT {@link aggressionOf}: that curve prices "would you bet this
+ * into a checked pot", and raising a bet is a far rarer act than betting an
+ * unbet pot. Reusing it makes a bot believe someone re-raises it roughly a
+ * quarter of the time, which — compounded over five live seats — reads as "I
+ * am 3-bet three times out of four" and no persona ever opens a pot again.
+ *
+ * Calibrated so a full, unfiltered range raises about 10% of the time against
+ * a half-pot bet and about 5% against a 2x-pot (open-raise-sized) one: bigger
+ * bets get raised less, aggressive actors raise more, and the very bottom of
+ * the range keeps a small bluff-raise share.
+ */
+export function raiseBackOf(s: number, p: PolicyParams, sizeFraction: number): number {
+  const mid = 0.92 + 0.1 * (sizeTerm(sizeFraction) - 0.5) - 0.16 * (p.aggression - 0.5);
+  const value = logistic(s, mid, 14);
+  const bluffDepth = clamp01((0.18 - s) / 0.18);
+  return clamp01(value + p.bluffFrequency * bluffDepth * bluffDepth * 0.4);
 }
 
 /** What was observed, and who is assumed to have produced it. */
@@ -212,6 +241,47 @@ export function continuanceFraction(
     cont += w * continuationOf(strength[i] ?? 0, params, sizeFraction);
   }
   return mass <= 0 ? 0 : cont / mass;
+}
+
+/**
+ * The two ways a modelled range answers a bet of `sizeFraction` pot: the share
+ * that continues at all, and the share that answers with a RAISE.
+ *
+ * Both come out of one pass over the 1326 combos — stage 4 prices every
+ * candidate size, so a second loop per size is real cost for no new
+ * information.
+ *
+ * The raise branch is {@link raiseBackOf} — the same generative model the
+ * reader uses, so the frequency a bot FEARS a raise with is the frequency it
+ * READS one with.
+ */
+export interface RangeResponse {
+  /** Weighted share of the range that calls or raises, [0, 1]. */
+  continues: number;
+  /** Weighted share of the range that raises, [0, 1]; never above `continues`. */
+  raises: number;
+}
+
+export function responseFractions(
+  range: WeightedRange,
+  strength: Float32Array,
+  params: PolicyParams,
+  sizeFraction: number,
+): RangeResponse {
+  let mass = 0;
+  let cont = 0;
+  let raise = 0;
+  for (let i = 0; i < RANGE_SIZE; i++) {
+    const w = range[i] as number;
+    if (w <= 0) continue;
+    const s = strength[i] ?? 0;
+    mass += w;
+    cont += w * continuationOf(s, params, sizeFraction);
+    raise += w * raiseBackOf(s, params, sizeFraction);
+  }
+  if (mass <= 0) return { continues: 0, raises: 0 };
+  const continues = cont / mass;
+  return { continues, raises: Math.min(continues, raise / mass) };
 }
 
 /**

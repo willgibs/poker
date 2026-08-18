@@ -93,18 +93,36 @@ export function decide(
   const behavior = {
     disableFold: behaviorTells.disableFold,
     aggressionBias: behaviorTells.aggressionBias,
-    bluffFrequencyScale: behaviorTells.bluffFrequencyScale,
+    bluffFrequencyScale: behaviorTells.bluffFrequencyScale * adaptation.bluffScale,
   };
 
   // --- stage 5: personality shaping ----------------------------------------
   const baseParams = tiltAdjust(persona, 0);
-  const shaped = shapeAndSelect({ ctx, persona, params: baseParams, candidates, bluffRoll, selectionRoll, behavior });
+  const shaped = shapeAndSelect({
+    ctx,
+    persona,
+    params: baseParams,
+    candidates,
+    strengthPercentile: strength.strengthPercentile,
+    bluffRoll,
+    selectionRoll,
+    behavior,
+  });
 
   // --- stage 6: tilt + deliberate error ------------------------------------
   const tiltParams = tiltAdjust(persona, botState.tilt);
   const tilted =
     botState.tilt > 0
-      ? shapeAndSelect({ ctx, persona, params: tiltParams, candidates, bluffRoll, selectionRoll, behavior })
+      ? shapeAndSelect({
+          ctx,
+          persona,
+          params: tiltParams,
+          candidates,
+          strengthPercentile: strength.strengthPercentile,
+          bluffRoll,
+          selectionRoll,
+          behavior,
+        })
       : shaped;
   const changedChoice = tilted.chosen !== shaped.chosen;
 

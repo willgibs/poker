@@ -60,10 +60,45 @@ export class StrengthCache {
   }
 }
 
-/** Policy parameters the bot attributes to an opponent seat. */
-export function assumedParamsFor(state: BotState, seat: number): PolicyParams {
+/**
+ * `adaptationRate` at which a persona trusts its observations completely.
+ * Above this the model is fully the opponent; below it the population prior
+ * keeps its share.
+ */
+export const FULL_TRUST_ADAPTATION_RATE = 0.5;
+
+/**
+ * Trust a persona has in its own observations even at `adaptationRate` zero.
+ *
+ * Not exploiting you is not the same as not noticing you. The Professor's 0.05
+ * is authored as "he plays the equilibrium, not you" — he declines to HUNT
+ * leaks; he does not decline to see that the table is loose. Gating his
+ * opponent model to nothing on the strength of that number cost him the whole
+ * tier-6 rung heads-up, because a crusher with no model of the field is not a
+ * crusher.
+ */
+export const BASELINE_MODEL_TRUST = 0.35;
+
+/**
+ * Policy parameters the bot attributes to an opponent seat.
+ *
+ * The blend is ramped by BOTH the sample (hands shared) and the persona's own
+ * `adaptationRate`. Ramping on the sample alone — which is what this did
+ * before — gives Barry (`adaptationRate` 0.05) and Ingrid (0.95) the identical
+ * opponent model after sixty hands, which is wrong twice over: it hands a
+ * whale a read his bible explicitly denies him, and it makes the cast's
+ * headline adaptive character no better informed than anyone else. The bibles
+ * spend a whole parameter on this; it should reach the model it names.
+ */
+export function assumedParamsFor(
+  state: BotState,
+  seat: number,
+  adaptationRate: number,
+): PolicyParams {
   const stats = opponentOf(state, seat);
-  const ramp = adaptationRamp(stats);
+  const exploit = Math.min(1, Math.max(0, adaptationRate / FULL_TRUST_ADAPTATION_RATE));
+  const trust = BASELINE_MODEL_TRUST + (1 - BASELINE_MODEL_TRUST) * exploit;
+  const ramp = adaptationRamp(stats) * trust;
   const blend = (observed: number, prior: number): number => prior + ramp * (observed - prior);
   return {
     aggression: blend(stats.aggression, DEFAULT_POLICY_PARAMS.aggression),
@@ -83,6 +118,8 @@ export interface RangeState {
   primarySeat: number | null;
   /** Policy parameters attributed to the primary opponent. */
   primaryParams: PolicyParams;
+  /** Policy parameters attributed to EVERY live opponent, by seat. */
+  paramsByOpponent: ReadonlyMap<number, PolicyParams>;
   strength: StrengthCache;
   trace: RangeStateTrace;
 }
@@ -118,10 +155,21 @@ export function buildRangeState(
   const strength = new StrengthCache(ctx.board);
   const dead: Card[] = [ctx.hole[0], ctx.hole[1], ...ctx.board];
   const byOpponent = new Map<number, WeightedRange>();
+  const paramsByOpponent = new Map<number, PolicyParams>();
   const opponentTraces: OpponentRangeTrace[] = [];
   const primarySeat = primaryOpponentOf(ctx);
 
   let priorPercentTrace = 1;
+
+  // A seat that has not voluntarily put a chip in has not SELECTED a hand yet.
+  // Its VPIP is the range it plays, not the range it was dealt, and applying
+  // the shaped prior before it acts models a table where everybody always
+  // holds a premium: fold equity vanishes, the bot's own equity collapses, and
+  // nobody ever opens a pot.
+  const voluntary = new Set<number>();
+  for (const a of ctx.scan.acts) {
+    if (a.kind === "call" || a.kind === "bet" || a.kind === "raise") voluntary.add(a.seat);
+  }
 
   for (const seat of ctx.opponents) {
     const stats = opponentOf(botState, seat);
@@ -133,11 +181,13 @@ export function buildRangeState(
       // Whales and stations read cards, not ranges.
       range = maskBlocked(fullRange(), dead);
     } else {
-      const priorPct = Math.min(0.95, Math.max(0.06, stats.vpip));
+      const priorPct = voluntary.has(seat) ? Math.min(0.95, Math.max(0.06, stats.vpip)) : 1;
       priorPercentTrace = priorPct;
-      range = topPercentByRanking(priorPct, DEFAULT_PREFLOP_RANKING);
-      maskBlocked(range, dead, range);
-      const params = assumedParamsFor(botState, seat);
+      range =
+        priorPct >= 1
+          ? maskBlocked(fullRange(), dead)
+          : maskBlocked(topPercentByRanking(priorPct, DEFAULT_PREFLOP_RANKING), dead);
+      const params = assumedParamsFor(botState, seat, persona.adaptationRate);
       for (const act of ctx.scan.acts) {
         if (act.seat !== seat) continue;
         if (act.kind === "fold") continue; // a folded seat has no live range
@@ -163,6 +213,12 @@ export function buildRangeState(
     }
 
     byOpponent.set(seat, range);
+    paramsByOpponent.set(
+      seat,
+      caps.usesRangeFiltering
+        ? assumedParamsFor(botState, seat, persona.adaptationRate)
+        : DEFAULT_POLICY_PARAMS,
+    );
 
     const strengthNow = strength.forStreet(ctx.street);
     let sum = 0;
@@ -190,7 +246,11 @@ export function buildRangeState(
     byOpponent,
     primary: clone(primary),
     primarySeat,
-    primaryParams: primarySeat === null ? DEFAULT_POLICY_PARAMS : assumedParamsFor(botState, primarySeat),
+    paramsByOpponent,
+    primaryParams:
+      primarySeat === null
+        ? DEFAULT_POLICY_PARAMS
+        : assumedParamsFor(botState, primarySeat, persona.adaptationRate),
     strength,
     trace: {
       filtered: caps.usesRangeFiltering,

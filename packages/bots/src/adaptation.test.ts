@@ -132,7 +132,7 @@ describe("adaptation shifts fold-equity estimates", () => {
     const cold = foldEquityFor("ingrid", initialBotState(ingrid));
     const warm = foldEquityFor("ingrid", observeMany("ingrid", foldsToEverything, 80));
     expect(cold.shift).toBe(0);
-    expect(warm.shift).toBeGreaterThan(0.1);
+    expect(warm.shift).toBeGreaterThan(MAX_FOLD_EQUITY_SHIFT / 2);
     expect(warm.maxFoldFreq).toBeGreaterThan(cold.maxFoldFreq);
   });
 
@@ -140,7 +140,7 @@ describe("adaptation shifts fold-equity estimates", () => {
     const ingrid = personaById("ingrid");
     const cold = foldEquityFor("ingrid", initialBotState(ingrid));
     const warm = foldEquityFor("ingrid", observeMany("ingrid", callsEverything, 80));
-    expect(warm.shift).toBeLessThan(-0.1);
+    expect(warm.shift).toBeLessThan(-MAX_FOLD_EQUITY_SHIFT / 2);
     expect(warm.maxFoldFreq).toBeLessThan(cold.maxFoldFreq);
   });
 

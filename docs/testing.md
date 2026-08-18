@@ -15,8 +15,12 @@ lighter-touch elsewhere. Vitest + fast-check throughout; engine packages run in 
 - **RNG (`rng`):** known-answer vectors for splitmix32/xoshiro128**; stream independence.
 - **Equity:** MC within 3 standard errors of exact enumeration on a spot corpus; symmetry
   and dominance properties.
-- **Bots:** statistical envelopes — simulated VPIP/PFR/AF per persona within bounds over
-  seeded self-play; tier ordering (each tier beats the tier below at a margin).
+- **Bots:** statistical envelopes — simulated VPIP/PFR/AF/WTSD per persona within bounds
+  over seeded self-play; tier ordering (each tier beats the tier below at a margin);
+  adversarial probes (degenerate strategies must not print money). The envelopes are
+  derived and the measurements recorded in `packages/bots/CALIBRATION.md`; the gate is
+  `packages/bots/test/calibration.test.ts`, which runs a fast smoke by default and the
+  full-size run under `FULL_CAL=1`.
 - **ICM:** Malmuth-Harville vs published worked examples; equities sum to prize pool.
 - **UI:** Presenter is headless and unit-tested (event burst → beat schedule). Playwright:
   keyboard-only hand playthrough, axe scans, tablet-width smoke.

@@ -31,7 +31,15 @@ import type { StrengthTrace } from "./trace";
 /** Percentile above which a combo counts as the villain's "value" region. */
 export const VALUE_PERCENTILE = 0.8;
 
-/** Maximum equity swing a blocker read may produce, in equity points. */
+/**
+ * Maximum equity swing a blocker read may produce, in equity points.
+ *
+ * Capped so blockers stay a tiebreaker rather than a strategy. Widening it to
+ * 0.1 was measured against the tier ladder and made tier 5 WORSE, not better:
+ * a blocker read is a real edge only where the rest of the estimate is already
+ * accurate, and inflating it just adds variance to the equity number every
+ * later stage prices against.
+ */
 export const MAX_BLOCKER_ADJUSTMENT = 0.05;
 
 export interface StrengthEstimate {

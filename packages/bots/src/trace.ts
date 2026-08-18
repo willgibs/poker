@@ -133,6 +133,17 @@ export interface ShapingTrace {
   callDownBias: number;
   foldBias: number;
   bluffGate: { roll: number; threshold: number; open: boolean; dropped: number };
+  /**
+   * Preflop frequency anchor (stage 5). Absent postflop. `entryEdge` and
+   * `raiseEdge` are percentile distances from the persona's authored VPIP /
+   * PFR thresholds; the biases are those edges in cents.
+   */
+  preflopAnchor?: {
+    entryEdge: number;
+    raiseEdge: number;
+    entryBias: number;
+    raiseBias: number;
+  };
   /** Chart-derived push/fold nudge, when a Nash chart applied. */
   nashChart?: { chartId: string; depthBb: number; weight: number };
   selection: { roll: number; kind: ActionKind; amount?: number };
