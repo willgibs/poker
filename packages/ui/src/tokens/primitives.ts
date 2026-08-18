@@ -387,16 +387,17 @@ export const loop = {
 } as const;
 
 /**
- * Blur is capped at 2px for motion (beats.md §5.4); 3px is celebration-only.
- *
- * The recipes also carry `--blur-large` (8px, success-check open). It is
- * deliberately absent here: 8px is far outside the beats.md cap, so it needs a
- * law amendment (L21) before it can enter the token table.
+ * The blur ladder, tiered by L21 (ratified Gate 3M, 2026-08-18): ≤2px on
+ * chrome, 3px mid-flight on a surface already travelling, 8px only on a
+ * delight-tier entrance (success-check open, smoky-dissolve bloom) — and
+ * never on exit. Nothing above 8px, ever. Reduce-motion caps at 2px
+ * (beats.md §5.4).
  */
 export const blur = {
   none: "0px",
   small: "2px",
   medium: "3px",
+  large: "8px",
 } as const;
 
 /**

@@ -138,6 +138,7 @@
   --fr-blur-none: 0px;
   --fr-blur-small: 2px;
   --fr-blur-medium: 3px;
+  --fr-blur-large: 8px;
 
   /* motion — ambient loops */
   --fr-loop-pulse: 1200ms;
