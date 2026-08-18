@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "@tanstack/react-router";
 
+import "@poker/ui/fonts.css";
 import "@poker/ui/tokens.css";
 import "@poker/ui/components.css";
 import "./app.css";

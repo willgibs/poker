@@ -23,23 +23,71 @@ sound cues aren't CSS values at all).
 ```ts
 import { ink, space, spring } from "@poker/ui";
 
-ink[50];            // "#0a0b0e" — canvas
+ink[50];            // "#050507" — canvas
 space[4];            // "16px"
 spring.chip;          // { stiffness: 385.5, damping: 32.2, mass: 1, ... }
 ```
 
+The values here are **Carbon**, locked at Gate 1 (design-law L12, variation C).
+Three families carry law directly and may not be changed without a gate:
+
+| Family | Law | Shape |
+|---|---|---|
+| `ink` | L12 | Carbon grey ramp. The named anchors sit on fixed steps: `50` canvas, `150` surface/card-ink, `200` raised, `250` hairline, `300` line, `600` faint, `800` dim, `950` text, `1000` card face. |
+| `radius` | L14 | Tight: `sm` 2px · `md` 4px · `lg` 7px, plus `pill`/`circle`. Crisp 1px edges are part of the identity. |
+| `fontSize` / `letterSpacing` / `textStyles` | L1, L2, L9 | The six Gate 1 roles in one family (General Sans): display 32/600/-0.021em · title 22/600/-0.018em · heading 17/600/-0.014em · body 14/400/-0.006em · small 12.5/400/-0.004em · label 11/500/+0.08em uppercase. `label` is the **only** tracked and the only uppercase role. |
+
+`fontWeight.bold` is pinned to 600, not 700: the shipped webfont carries 400 and
+600 only (see "Fonts" below), and a 700 request would be faux-bolded.
+
+#### Compatibility aliases
+
+Tokens ripple, but components wait for Gates 3-5. Rather than strand the CSS
+those components already ship, the pre-Carbon **names** are kept as aliases onto
+the Carbon **values** — `radius.xs/xl/xxl`, the `fontSize.displayXl…labelSm`
+ladder, and `letterSpacing.tighter/tight/snug/wide/wider/widest`. They are
+labelled as aliases in `primitives.ts` and retire with the components that use
+them. Note the consequence in the tracking table: `wide`/`wider`/`widest` used
+to be 0.14/0.18/0.26em and now all resolve to the single sanctioned +0.08em
+eyebrow value, so no surface can reintroduce wide tracking by name (L1).
+
 ### Layer 2 — semantic (`tokens/semantic.ts`)
 
-Meaning, not appearance: `canvas`, `surface`, `text`, `accentA`, `felt1`, `pos`,
-`neg`, etc. Components reference **only** this layer (plus non-color primitives
-like `space`/`radius`) — never a primitive color, never a skin. The base values
-*are* the default skin, "Afterhours".
+Meaning, not appearance: `canvas`, `surface`, `raised`, `line`, `text`, `dim`,
+`primary`, `felt`, `pos`, `neg`, etc. Components reference **only** this layer
+(plus non-color primitives like `space`/`radius`) — never a primitive color,
+never a skin. The base values *are* the default skin, "Carbon".
 
 ```ts
 import { semantic } from "@poker/ui";
 
-semantic.pos; // "#7fe0b0" — win color, identical in every skin (see below)
+semantic.pos; // "#1cb271" — win color, identical in every skin (see below)
 ```
+
+Under the Signal doctrine (L8) this layer is **achromatic except where color
+carries meaning**. Everything chromatic in it is on the sanctioned list:
+
+- **Suits (L13)** — vivid `suitH`/`suitD`/`suitC`. The spade is not a hue: it is
+  two tokens, `suitSpadeFace` (near-black, on card stock) and `suitSpadeChrome`
+  (near-white, on dark chrome). Never collapse them into "the spade color".
+- **States** — `pos`, `neg`, `warn`.
+- **Data (L10)** — `chart`, the analytics encoding base.
+
+Primaries are **white**, not chromatic: `primary`/`onPrimary`/`primaryHover`/
+`primaryPress`, and one focus ring (`focus`, 2px with a 2px offset) for the whole
+system.
+
+**The felt is still open (L16).** Both candidates ship as tokens —
+`feltAchromatic` (#0a0b0d) and `feltWhisperGreen` (#090e0c) — and `felt` points
+at the achromatic one as a *placeholder*, not a decision. The felt and the
+floating-stage question are answered together, on the real table at scale.
+
+Semantic tokens carry compatibility aliases on the same terms as the primitives:
+`edge` → `line`, `muted` → `dim`, `suitS` → `suitSpadeFace`, `felt1`/`felt2` →
+`felt`, `glow` → `focus`, and `accentA`/`accentB` → `primary`. That last pair is
+how L3 is enforced without touching component CSS: every surviving
+`linear-gradient(var(--fr-accent-a), var(--fr-accent-b))` now collapses to the
+flat white primary instead of stranding a dead gradient.
 
 ### Layer 3 — skins (`tokens/skins.ts`)
 
@@ -49,15 +97,17 @@ purely as a `Partial<Record<SemanticTokenName, string>>` per skin name.
 
 ```ts
 export const skins = {
-  afterhours: {},                          // the base layer IS this skin
-  midnight: { accentA: "#7fe0c3", felt1: "#1a3a2f", /* … */ },
-  cardroom: { accentA: "#e8c87a", felt1: "#2e5c48", /* … */ },
+  carbon: {}, // DEFAULT and, for now, ONLY — the base layer IS this skin
 };
 ```
 
+The pre-Carbon trio (`afterhours`, `midnight`, `cardroom`) is **deleted, not
+migrated**: all three were built on gradient accents and colored felts, which L3
+and L8 retired. The mechanism above is kept intact and exercised so that
+reopening cosmetics at Gate 3-5 is a data change, not a rebuild.
+
 `pos`/`neg` (profit/loss color) are never overridden by a skin — profit must
-read the same color in every theme (see the comment in `semantic.ts` on the
-Midnight mint/win-green collision this avoids).
+read the same color in every theme (see the comment in `semantic.ts`).
 
 ## Skin mechanism: `data-skin`
 
@@ -72,7 +122,7 @@ never leave a stale token behind.
 ```css
 /* apps/web sets this attribute on <html> or a theme root; everything under it
    re-resolves for free because components only ever speak semantic tokens. */
-<html data-skin="midnight">
+<html data-skin="carbon">
 ```
 
 Regenerate with `pnpm tokens:build` whenever a token in `primitives.ts` or
@@ -90,9 +140,28 @@ compiler emits, so a renamed or typo'd token is a build error, not a silently
 missing CSS variable.
 
 ```ts
-cssVar("felt-1");                  // "var(--fr-felt-1)"
-cssVar("accent-a", "#ffb98a");     // "var(--fr-accent-a, #ffb98a)" — offscreen fallback only
+cssVar("felt");                    // "var(--fr-felt)"
+cssVar("suit-h", "#f04a37");       // "var(--fr-suit-h, #f04a37)" — offscreen fallback only
 ```
+
+## Fonts
+
+General Sans is the voice (L9), self-hosted and imported alongside the tokens:
+
+```ts
+import "@poker/ui/fonts.css";   // packages/ui/src/fonts.gen.css
+import "@poker/ui/tokens.css";
+```
+
+`fonts.gen.css` is copied verbatim from the Gate 0 kit
+(`poker-internal/design/gates/gate0/fonts/fonts.css`) — two `@font-face` blocks,
+weights 400 and 600, each inlined as a base64 woff2 data URI so the sheet issues
+no network request and needs no CSP allowance. **These are ASCII subsets**
+(U+0020-007E plus curly quotes, en/em dashes, ellipsis); arbitrary user-entered
+or non-Latin text falls through to the system stack. The full character-set
+files land at Gate 5. `packages/ui/src/fonts.test.ts` guards all of it — face
+count, weights, data-URI-only sources, and that `fontWeight` never asks for a
+weight the kit cannot draw.
 
 ## Beat tokens: the pointer to the Presenter
 

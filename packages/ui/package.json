@@ -4,6 +4,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./fonts.css": "./src/fonts.gen.css",
     "./tokens.css": "./src/tokens.gen.css",
     "./components.css": "./src/components/components.css"
   },

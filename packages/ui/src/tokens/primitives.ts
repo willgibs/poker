@@ -10,7 +10,10 @@
  * (spring physics, sound cue ids) stay TypeScript-only.
  *
  * Sources of truth:
- *   - palette / type / spacing: DC0-DC1 explorations (poker-internal/design/explorations)
+ *   - palette: design-law L12 ("Carbon"), gate1 variation C
+ *   - radii: design-law L14 (tight family, 2 / 4 / 7)
+ *   - type: design-law L9 (General Sans), L1 (tight tracking), L2 (sentence
+ *     case), gate1's shared type scale
  *   - duration + easing + spring tables: poker-internal/content/motion/beats.md §2
  *   - sound cues: beats.md §6.2
  */
@@ -20,26 +23,31 @@
 /* -------------------------------------------------------------------------- */
 
 /**
- * The ink ramp — the near-black neutral family the whole brand sits on.
- * `0` is deeper than the canvas (shadows, wells); `1000` is the card-stock
- * white. Dark-only brand: there is no light ramp and there will not be one.
+ * The ink ramp — the Carbon neutral family the whole brand sits on (L12).
+ * `0` is deeper than the canvas (shadows, wells); `1000` is the card stock.
+ * The named L12 anchors live on the steps they were locked at:
+ *
+ *   50 canvas · 150 surface / card ink · 200 raised · 250 hairline
+ *   300 line · 600 faint · 800 dim · 950 text · 1000 card face
+ *
+ * Dark-only brand: there is no light ramp and there will not be one.
  */
 export const ink = {
-  0: "#07080a",
-  50: "#0a0b0e",
-  100: "#0b0c10",
-  150: "#0e0f14",
-  200: "#121016",
-  250: "#16181d",
-  300: "#1d1f27",
-  400: "#2a2c36",
-  500: "#3d3f4d",
-  600: "#5c5966",
-  700: "#7b7889",
-  800: "#918e9f",
-  900: "#c9c2d1",
-  950: "#e6e4ee",
-  1000: "#fbfaf7",
+  0: "#020203",
+  50: "#050507",
+  100: "#0a0b0d",
+  150: "#0f1113",
+  200: "#171a1e",
+  250: "#1b1e22",
+  300: "#2c2f35",
+  400: "#3a3e45",
+  500: "#4a4e55",
+  600: "#55585f",
+  700: "#6d717a",
+  800: "#868a92",
+  900: "#b9bdc4",
+  950: "#f3f4f6",
+  1000: "#f5f7f9",
 } as const;
 
 /* -------------------------------------------------------------------------- */
@@ -63,16 +71,30 @@ export const space = {
   24: "96px",
 } as const;
 
+/**
+ * The radius family is TIGHT (L14): three steps, 2 / 4 / 7. Crisp 1px edges
+ * and near-square corners are part of the Carbon identity — a soft corner is
+ * now a deliberate exception, not a default.
+ *
+ *   sm  2px — card faces, seat plates, the smallest chrome
+ *   md  4px — buttons, inputs, felt panels
+ *   lg  7px — cards, sheets, the largest containers
+ *
+ * `xs` / `xl` / `xxl` are retained as aliases onto the three-step family so
+ * component CSS written against the pre-Carbon scale keeps resolving; they
+ * retire when those components are rebuilt at Gate 3-5.
+ */
 export const radius = {
   none: "0px",
-  xs: "4px",
-  sm: "6px",
-  md: "10px",
-  lg: "14px",
-  xl: "18px",
-  xxl: "24px",
+  sm: "2px",
+  md: "4px",
+  lg: "7px",
   pill: "999px",
   circle: "50%",
+  /* aliases onto the tight family — see above */
+  xs: "2px",
+  xl: "7px",
+  xxl: "7px",
 } as const;
 
 /* -------------------------------------------------------------------------- */
@@ -80,52 +102,93 @@ export const radius = {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Provisional stacks. The display face is a self-hosted geometric sans chosen
- * at DC1; until then Avenir Next / Futura carry the "oversized friendly
- * geometric" brief with a system fallback chain.
+ * General Sans is the voice (L9) — display and UI from one family. The webfont
+ * is self-hosted; see `fonts.gen.css` (`import "@poker/ui/fonts.css"`).
  */
 export const fontFamily = {
-  display: '"Avenir Next", Futura, "Century Gothic", -apple-system, "Segoe UI", system-ui, sans-serif',
-  body: '"Avenir Next", Futura, "Century Gothic", -apple-system, "Segoe UI", system-ui, sans-serif',
-  mono: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+  display: "'General Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
+  body: "'General Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
+  mono: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace",
 } as const;
 
+/**
+ * The Carbon type scale — gate1's shared scale, six roles, one family:
+ *
+ *   display  32   / 600 / -0.021em
+ *   title    22   / 600 / -0.018em
+ *   heading  17   / 600 / -0.014em
+ *   body     14   / 400 / -0.006em
+ *   small    12.5 / 400 / -0.004em
+ *   label    11   / 500 / +0.08em, uppercase (the ONLY tracked role — L1)
+ *
+ * The `display*` / `body*` / `label*` keys below are pre-Carbon names kept as
+ * aliases onto the nearest role so component CSS keeps resolving until those
+ * components are rebuilt at Gate 3-5.
+ */
 export const fontSize = {
-  displayXl: "44px",
-  displayLg: "34px",
-  displayMd: "27px",
-  displaySm: "21px",
-  bodyLg: "16.5px",
-  bodyMd: "15px",
-  bodySm: "13.5px",
+  display: "32px",
+  title: "22px",
+  heading: "17px",
+  body: "14px",
+  small: "12.5px",
+  label: "11px",
+  /* aliases onto the six roles — see above */
+  displayXl: "32px",
+  displayLg: "32px",
+  displayMd: "22px",
+  displaySm: "17px",
+  bodyLg: "14px",
+  bodyMd: "14px",
+  bodySm: "12.5px",
   bodyXs: "12.5px",
-  labelLg: "13px",
-  labelMd: "11.5px",
-  labelSm: "10px",
+  labelLg: "12.5px",
+  labelMd: "11px",
+  labelSm: "11px",
 } as const;
 
+/**
+ * The shipped General Sans subsets carry 400 and 600 only (see
+ * `fonts.gen.css`). `medium` resolves to the 400 face and `bold` is pinned to
+ * 600 rather than 700 so the browser never synthesises a weight that has no
+ * drawn face. The full weight set lands at Gate 5.
+ */
 export const fontWeight = {
   regular: "400",
   medium: "500",
   semibold: "600",
-  bold: "700",
+  bold: "600",
 } as const;
 
 export const lineHeight = {
   tight: "1.1",
-  snug: "1.25",
+  snug: "1.2",
+  heading: "1.3",
   normal: "1.5",
   relaxed: "1.6",
 } as const;
 
+/**
+ * Tracking is tight to neutral (L1). Wide tracking survives in exactly one
+ * place — the 11px uppercase eyebrow (`label`, +0.08em). The pre-Carbon
+ * `wide` / `wider` / `widest` steps (0.14 / 0.18 / 0.26em) are dead; they now
+ * alias onto the single sanctioned label value so no surface can reintroduce
+ * them by name.
+ */
 export const letterSpacing = {
-  tighter: "-0.02em",
-  tight: "-0.015em",
-  snug: "-0.01em",
+  display: "-0.021em",
+  title: "-0.018em",
+  heading: "-0.014em",
+  body: "-0.006em",
+  small: "-0.004em",
+  label: "0.08em",
   normal: "0em",
-  wide: "0.14em",
-  wider: "0.18em",
-  widest: "0.26em",
+  /* aliases — see above */
+  tighter: "-0.021em",
+  tight: "-0.018em",
+  snug: "-0.014em",
+  wide: "0.08em",
+  wider: "0.08em",
+  widest: "0.08em",
 } as const;
 
 /** A complete text role: everything a label needs, nothing it does not. */
@@ -139,88 +202,53 @@ export interface TextStyle {
 }
 
 /**
- * The composed type scale. Three roles: `display` (headings, the brand voice),
- * `body` (prose and numerals), `label` (tracked uppercase chrome).
+ * The composed type scale — the six gate1 roles, nothing else. Hierarchy comes
+ * from size contrast and spacing, not from stacking weight + tracking + colour
+ * (L4): only `label` carries a second device, and only because an 11px eyebrow
+ * cannot carry size contrast at all.
  */
 export const textStyles = {
-  displayXl: {
+  display: {
     fontFamily: fontFamily.display,
-    fontSize: fontSize.displayXl,
-    fontWeight: fontWeight.bold,
+    fontSize: fontSize.display,
+    fontWeight: fontWeight.semibold,
     lineHeight: lineHeight.tight,
-    letterSpacing: letterSpacing.tighter,
+    letterSpacing: letterSpacing.display,
   },
-  displayLg: {
+  title: {
     fontFamily: fontFamily.display,
-    fontSize: fontSize.displayLg,
-    fontWeight: fontWeight.bold,
-    lineHeight: lineHeight.tight,
-    letterSpacing: letterSpacing.tight,
-  },
-  displayMd: {
-    fontFamily: fontFamily.display,
-    fontSize: fontSize.displayMd,
-    fontWeight: fontWeight.bold,
-    lineHeight: lineHeight.snug,
-    letterSpacing: letterSpacing.tight,
-  },
-  displaySm: {
-    fontFamily: fontFamily.display,
-    fontSize: fontSize.displaySm,
-    fontWeight: fontWeight.bold,
-    lineHeight: lineHeight.snug,
-    letterSpacing: letterSpacing.snug,
-  },
-  bodyLg: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.bodyLg,
-    fontWeight: fontWeight.regular,
-    lineHeight: lineHeight.normal,
-    letterSpacing: letterSpacing.normal,
-  },
-  bodyMd: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.bodyMd,
-    fontWeight: fontWeight.regular,
-    lineHeight: lineHeight.normal,
-    letterSpacing: letterSpacing.normal,
-  },
-  bodySm: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.bodySm,
-    fontWeight: fontWeight.regular,
-    lineHeight: lineHeight.normal,
-    letterSpacing: letterSpacing.normal,
-  },
-  bodyXs: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.bodyXs,
-    fontWeight: fontWeight.regular,
-    lineHeight: lineHeight.normal,
-    letterSpacing: letterSpacing.normal,
-  },
-  labelLg: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.labelLg,
+    fontSize: fontSize.title,
     fontWeight: fontWeight.semibold,
     lineHeight: lineHeight.snug,
-    letterSpacing: letterSpacing.wide,
-    textTransform: "uppercase",
+    letterSpacing: letterSpacing.title,
   },
-  labelMd: {
-    fontFamily: fontFamily.body,
-    fontSize: fontSize.labelMd,
+  heading: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize.heading,
     fontWeight: fontWeight.semibold,
-    lineHeight: lineHeight.snug,
-    letterSpacing: letterSpacing.wider,
-    textTransform: "uppercase",
+    lineHeight: lineHeight.heading,
+    letterSpacing: letterSpacing.heading,
   },
-  labelSm: {
+  body: {
     fontFamily: fontFamily.body,
-    fontSize: fontSize.labelSm,
-    fontWeight: fontWeight.bold,
+    fontSize: fontSize.body,
+    fontWeight: fontWeight.regular,
+    lineHeight: lineHeight.relaxed,
+    letterSpacing: letterSpacing.body,
+  },
+  small: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.small,
+    fontWeight: fontWeight.regular,
+    lineHeight: lineHeight.normal,
+    letterSpacing: letterSpacing.small,
+  },
+  label: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.label,
+    fontWeight: fontWeight.medium,
     lineHeight: lineHeight.snug,
-    letterSpacing: letterSpacing.widest,
+    letterSpacing: letterSpacing.label,
     textTransform: "uppercase",
   },
 } as const satisfies Readonly<Record<string, TextStyle>>;
