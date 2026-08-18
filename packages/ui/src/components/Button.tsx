@@ -18,10 +18,12 @@
  *   import "@poker/ui/components.css";
  *
  * Motion: the shared press feedback (`PRESS_SCALE` / `pressTransition`,
- * beats.md §4.15) via `motion/react`'s `whileTap`, skipped entirely under
- * `prefers-reduced-motion`.
+ * beats.md §4.15) via `motion/react`'s `whileTap`. It is *kept* under
+ * `prefers-reduced-motion` — the press is feedback, not travel through space
+ * (beats.md §4.15, and the same rule `SizeChip` already follows). Only a
+ * disabled button has no press.
  */
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import type { ButtonHTMLAttributes, ReactNode, Ref } from "react";
 
 import { PRESS_SCALE, pressTransition } from "./motionTokens";
@@ -65,7 +67,6 @@ export function Button({
   ref,
   ...rest
 }: ButtonProps) {
-  const reduceMotion = useReducedMotion();
   const classes = ["fr-btn", `fr-btn--${variant}`, size === "md" ? null : `fr-btn--${size}`]
     .filter((c): c is string => typeof c === "string")
     .join(" ");
@@ -79,7 +80,7 @@ export function Button({
       className={classes}
       data-variant={variant}
       data-size={size}
-      whileTap={disabled || reduceMotion === true ? undefined : { scale: PRESS_SCALE }}
+      whileTap={disabled ? undefined : { scale: PRESS_SCALE }}
       transition={pressTransition}
     >
       <span className="fr-btn__label">{children}</span>

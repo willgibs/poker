@@ -1,13 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  distance,
   duration,
   durationMs,
+  easing,
   fontFamily,
   fontSize,
   ink,
   letterSpacing,
+  loop,
   radius,
+  scale,
+  scaleNum,
   soundCueBus,
   soundCueDefaultDb,
   soundCues,
@@ -266,6 +271,30 @@ describe("primitives", () => {
     for (const key of Object.keys(durationMs) as (keyof typeof durationMs)[]) {
       expect(duration[key]).toBe(`${durationMs[key]}ms`);
     }
+  });
+
+  it("pins the transitions.dev distance scale", () => {
+    expect(distance.micro).toBe("4px");
+    expect(distance.small).toBe("6px");
+    expect(distance.base).toBe("8px");
+    expect(distance.medium).toBe("12px");
+    expect(distance.large).toBe("30px");
+  });
+
+  it("keeps CSS scales in lockstep with their numeric twins", () => {
+    expect(Object.keys(scale)).toEqual(Object.keys(scaleNum));
+    for (const key of Object.keys(scaleNum) as (keyof typeof scaleNum)[]) {
+      // .96/.97/.98/.99 are exact in binary64, so String() round-trips cleanly.
+      expect(scale[key], key).toBe(String(scaleNum[key]));
+    }
+  });
+
+  it("holds the ambient think-pulse at its beats.md §4.14 period", () => {
+    expect(loop.pulse).toBe("1200ms");
+  });
+
+  it("carries a flat easing for ambient loops that must not accelerate", () => {
+    expect(easing.linear).toBe("linear");
   });
 
   it("derives each spring from its beats.md duration and bounce", () => {

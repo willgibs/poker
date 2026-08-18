@@ -10,6 +10,7 @@
 import { VAR_PREFIX } from "./tokens/emit";
 import type {
   blur,
+  distance,
   duration,
   easing,
   fontFamily,
@@ -18,7 +19,9 @@ import type {
   ink,
   letterSpacing,
   lineHeight,
+  loop,
   radius,
+  scale,
   space,
   zLayer,
 } from "./tokens/primitives";
@@ -45,7 +48,10 @@ export type TokenVarName =
   | Prefixed<"letter-spacing", keyof typeof letterSpacing>
   | Prefixed<"duration", keyof typeof duration>
   | Prefixed<"ease", keyof typeof easing>
+  | Prefixed<"distance", keyof typeof distance>
+  | Prefixed<"scale", keyof typeof scale>
   | Prefixed<"blur", keyof typeof blur>
+  | Prefixed<"loop", keyof typeof loop>
   | Prefixed<"z", keyof typeof zLayer>
   | KebabCase<SemanticTokenName>;
 

@@ -11,6 +11,7 @@
 /* Layer 1 — primitives */
 export {
   blur,
+  distance,
   duration,
   durationMs,
   easing,
@@ -20,7 +21,10 @@ export {
   ink,
   letterSpacing,
   lineHeight,
+  loop,
   radius,
+  scale,
+  scaleNum,
   soundBuses,
   soundCueBus,
   soundCueDefaultDb,

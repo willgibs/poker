@@ -380,7 +380,7 @@
   border-radius: var(--fr-radius-pill);
   pointer-events: none;
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--fr-glow) 60%, transparent);
-  animation: fr-seat-think 1200ms var(--fr-ease-in-out) infinite;
+  animation: fr-seat-think var(--fr-loop-pulse) var(--fr-ease-in-out) infinite;
 }
 
 @keyframes fr-seat-think {

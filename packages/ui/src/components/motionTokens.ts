@@ -7,12 +7,13 @@
  * it never writes down a second copy of a curve or a duration, so renaming or
  * retuning a token in `primitives.ts` moves the springs and the CSS together.
  *
- * Nothing here is a new value except `PRESS_SCALE`, which is beats.md §4.15's
- * `scale(0.97)` press — a motion constant with no CSS twin, and `packages/ui`
- * is the layer allowed to write it down.
+ * Nothing here is a new value at all. `PRESS_SCALE` used to be the exception —
+ * a hand-written 0.97 — but the scale axis now carries that step, so the press
+ * reads it out of `primitives.ts` like everything else. This module writes
+ * down no number and no curve of its own.
  */
 
-import { durationMs, easing, spring } from "../tokens/primitives";
+import { durationMs, easing, scaleNum, spring } from "../tokens/primitives";
 import type { SpringName } from "../tokens/primitives";
 
 /** What `motion/react` accepts for `transition.ease`. */
@@ -63,8 +64,12 @@ export function seconds(ms: number): number {
   return ms / 1000;
 }
 
-/** beats.md §4.15 — the hero press. Kept under reduce-motion: it is feedback, not travel. */
-export const PRESS_SCALE = 0.97;
+/**
+ * beats.md §4.15 — the hero press. Kept under reduce-motion: it is feedback,
+ * not travel. `scaleNum.medium` *is* §4.15's 0.97, so the press and the flat
+ * recipes that use the same step now move together.
+ */
+export const PRESS_SCALE = scaleNum.medium;
 
 /** The press transition: `--duration-micro`, `--ease-out`. */
 export const pressTransition = {

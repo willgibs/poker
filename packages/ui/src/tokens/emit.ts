@@ -12,6 +12,7 @@
 
 import {
   blur,
+  distance,
   duration,
   easing,
   fontFamily,
@@ -20,7 +21,9 @@ import {
   ink,
   letterSpacing,
   lineHeight,
+  loop,
   radius,
+  scale,
   space,
   zLayer,
 } from "./primitives";
@@ -65,7 +68,10 @@ const primitiveGroups: readonly TokenGroup[] = [
   { label: "tracking", prefix: "letter-spacing", tokens: letterSpacing },
   { label: "motion — durations (beats.md §2.2)", prefix: "duration", tokens: duration },
   { label: "motion — easings (beats.md §2.2)", prefix: "ease", tokens: easing },
+  { label: "motion — distances", prefix: "distance", tokens: distance },
+  { label: "motion — scales", prefix: "scale", tokens: scale },
   { label: "motion — blur", prefix: "blur", tokens: blur },
+  { label: "motion — ambient loops", prefix: "loop", tokens: loop },
   { label: "z layers", prefix: "z", tokens: zLayer },
 ];
 

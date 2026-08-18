@@ -15,6 +15,8 @@
  *   - type: design-law L9 (General Sans), L1 (tight tracking), L2 (sentence
  *     case), gate1's shared type scale
  *   - duration + easing + spring tables: poker-internal/content/motion/beats.md §2
+ *   - distance + scale tables: .agents/skills/transitions-dev/_root.css
+ *     (the flat-component recipes the UI kit is authored against)
  *   - sound cues: beats.md §6.2
  */
 
@@ -108,7 +110,7 @@ export const radius = {
 export const fontFamily = {
   display: "'General Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
   body: "'General Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
-  mono: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace",
+  mono: "'Geist Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace",
 } as const;
 
 /**
@@ -309,15 +311,88 @@ export const duration = {
 /**
  * Easings — beats.md §2.2. `ease-in` appears nowhere in this app, by law:
  * entrances and exits both use `smoothOut`.
+ *
+ * `linear` is the one exception to "everything eases": an ambient loop that
+ * accelerates reads as a stutter every time it wraps, so a pulse or a spinner
+ * runs flat. It is *not* a licence for a travelling gradient in chrome — the
+ * glint ruling (L3) still stands.
  */
 export const easing = {
   smoothOut: "cubic-bezier(0.22, 1, 0.36, 1)",
   inOut: "ease-in-out",
   bounce: "cubic-bezier(0.34, 1.36, 0.64, 1)",
   out: "ease-out",
+  linear: "linear",
 } as const;
 
-/** Blur is capped at 2px for motion (beats.md §5.4); 3px is celebration-only. */
+/**
+ * Travel distances for flat component motion — the transitions.dev
+ * `--distance-*` scale (`.agents/skills/transitions-dev/_root.css`), which the
+ * flat recipes are authored against:
+ *
+ *   micro   4px — text swap
+ *   small   6px — error shake, small segment
+ *   base    8px — badge diagonal reveal, page slide, error shake large segment
+ *   medium 12px — text reveal
+ *   large  30px — check-badge appear
+ *
+ * The table's *physical* travel (cards, chips, pots) is not here: it is
+ * geometry the Presenter computes, not a token (beats.md §4).
+ */
+export const distance = {
+  micro: "4px",
+  small: "6px",
+  base: "8px",
+  medium: "12px",
+  large: "30px",
+} as const;
+
+/**
+ * Pre/post scales for flat component motion — the transitions.dev `--scale-*`
+ * scale (same file):
+ *
+ *   large  0.96 — modal open / close
+ *   medium 0.97 — dropdown open (and the hero press, beats.md §4.15)
+ *   small  0.98 — tooltip open
+ *   tiny   0.99 — dropdown close
+ */
+export const scale = {
+  large: "0.96",
+  medium: "0.97",
+  small: "0.98",
+  tiny: "0.99",
+} as const;
+
+/**
+ * The same table as numbers, for `motion/react` — which takes a scale as a
+ * number, not a CSS string. This mirrors the `duration` / `durationMs` pair
+ * exactly: the string table is emitted as custom properties, the number table
+ * is TypeScript-only, and `tokens.test.ts` keeps the two in lockstep.
+ */
+export const scaleNum = {
+  large: 0.96,
+  medium: 0.97,
+  small: 0.98,
+  tiny: 0.99,
+} as const;
+
+/**
+ * Ambient loop periods. An ambient beat is free-running garnish (beats.md
+ * §2.3, class AMBIENT): it never speed-scales, and it may be suppressed but
+ * never hurried. `pulse` is the seat think-pulse period — beats.md §4.14's
+ * "ring opacity 0.7↔1.0, 1.2s loop".
+ */
+export const loop = {
+  pulse: "1200ms",
+} as const;
+
+/**
+ * Blur is capped at 2px for motion (beats.md §5.4); 3px is celebration-only.
+ *
+ * The recipes also carry `--blur-large` (8px, success-check open). It is
+ * deliberately absent here: 8px is far outside the beats.md cap, so it needs a
+ * law amendment (L21) before it can enter the token table.
+ */
 export const blur = {
   none: "0px",
   small: "2px",

@@ -9,3 +9,7 @@ coverage/
 .env.*
 *.tsbuildinfo
 .scratch/
+
+# transitions.dev Pro recipes (paid content — never commit to this public repo;
+# canonical copies live in poker-internal/content/motion/transitions-pro/)
+/transitions/

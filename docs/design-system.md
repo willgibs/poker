@@ -14,11 +14,18 @@ into this layer, never a literal.
 ### Layer 1 — primitives (`tokens/primitives.ts`)
 
 Raw, meaningless values: the ink ramp, the 4-based space scale, radii, the type
-scale, z-layers, motion durations/easings/springs, sound cue tables. This is the
-**only** file in the repo allowed to write down a color literal. Groups that map
-to CSS are emitted as `--fr-<group>-<token>` custom properties; springs and sound
-cues stay TypeScript-only (`motion/react` consumes spring physics directly, and
-sound cues aren't CSS values at all).
+scale, z-layers, the motion tables (durations, easings, distances, scales,
+ambient loops, blur, springs), sound cue tables. This is the **only** file in
+the repo allowed to write down a color literal. Groups that map to CSS are
+emitted as `--fr-<group>-<token>` custom properties; springs and sound cues stay
+TypeScript-only (`motion/react` consumes spring physics directly, and sound cues
+aren't CSS values at all).
+
+Two motion tables ship twice, once per consumer: `duration` (CSS strings, emitted)
+alongside `durationMs` (numbers, TS-only), and `scale` alongside `scaleNum` — CSS
+wants `"350ms"` / `"0.97"`, `motion/react` wants `350` / `0.97`. The numeric twin
+is never a second source of truth: `tokens.test.ts` asserts the two tables have
+the same keys, in the same order, with values that convert exactly.
 
 ```ts
 import { ink, space, spring } from "@poker/ui";
@@ -195,10 +202,38 @@ against `packages/table-ui`'s tokens; renderers in `packages/ui`/`apps/web` read
 invents a duration or spring outside these two tables — that identity
 (`table-ui`'s `DURATION` mirrors `ui`'s `duration`) is intentional, mirroring
 the pattern `packages/ui/src/tokens/tokens.test.ts` already uses to keep
-`duration` and `durationMs` in lockstep *within* `packages/ui`. There is not
-yet an equivalent cross-package test asserting `table-ui`'s `DURATION` and
-`ui`'s `duration` stay numerically identical — add one (in either package) the
-next time either table changes.
+`duration` and `durationMs` in lockstep *within* `packages/ui`.
+
+`packages/table-ui/src/tokens.test.ts` is the cross-package half of that rail.
+It asserts `DURATION` and `durationMs` have identical keys **in identical
+order** with identical values, that every `DURATION` entry resolves to the CSS
+time (`duration[k] === DURATION[k] + "ms"`) the renderer will actually use, and
+that `SpringToken` and `spring` name the same eight springs in **both**
+directions — a token added to the union without a spring is a compile error, a
+spring added without a token fails at runtime. If `table-ui` ever mirrors
+another axis, its lockstep assertion belongs in that file.
+
+### Flat component motion
+
+`beats.md` governs the table's *physical* time — cards, chips, pots, the things
+that travel. The normative spec for everything else (buttons, panels, sheets,
+tooltips, the flat chrome) is
+`poker-internal/content/motion/interactions.md`.
+
+Components compose motion **longhand** against the primitives —
+`transition: opacity var(--fr-duration-quick) var(--fr-ease-smooth-out)`, not a
+single packaged token. There are deliberately **no composite `--fr-transition-*`
+tokens**: a composite is one opaque string, and the CSS rails that keep this
+system honest (the `transition:` and `animation:` scans in
+`packages/ui/src/components/components.css.test.ts` and
+`packages/table-ui/src/components/componentsCss.test.ts`) read the parts. A
+composite would hide a hand-tuned value inside a token name — which is exactly
+how a bare `1200ms` sat in the think-pulse until the `animation:` scan landed.
+
+`packages/ui/src/components/motionTokens.ts` is the JS-side surface: named
+transitions (`pressTransition`, `flatTransition`, `reducedTransition`) and the
+`easeToMotion` / `springToMotion` / `seconds` converters. It derives everything
+from layer 1 and writes down no value of its own.
 
 ## Design budgets (CLAUDE.md) and their enforcement
 

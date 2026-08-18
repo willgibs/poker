@@ -80,9 +80,6 @@ importers:
       dexie:
         specifier: ^4.0.10
         version: 4.4.5
-      motion:
-        specifier: ^11.15.0
-        version: 11.18.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react:
         specifier: ^19.0.0
         version: 19.2.8

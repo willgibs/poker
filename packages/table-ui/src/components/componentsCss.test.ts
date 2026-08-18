@@ -49,6 +49,17 @@ describe("components.css — token purity", () => {
       expect(declaration).toMatch(/var\(--fr-ease-/);
     }
   });
+
+  it("uses token times for every animation shorthand", () => {
+    for (const declaration of code.match(/animation:[^;]+;/g) ?? []) {
+      // `animation: none` is the reduce-motion off switch, not a timing.
+      if (/animation:\s*none\b/.test(declaration)) continue;
+      expect(declaration, "animation time is not a token").toMatch(/var\(--fr-(?:duration|loop)-/);
+      // Any bare time value means a period was hand-tuned instead of looked up —
+      // the same guard `packages/ui/src/components/components.css.test.ts` runs.
+      expect(declaration.match(/(?<![\w-])\d*\.?\d+m?s\b/g), "bare time in animation").toBeNull();
+    }
+  });
 });
 
 describe("components.css — the locked metrics", () => {
