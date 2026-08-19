@@ -78,7 +78,7 @@ carries meaning**. Everything chromatic in it is on the sanctioned list:
   two tokens, `suitSpadeFace` (near-black, on card stock) and `suitSpadeChrome`
   (near-white, on dark chrome). Never collapse them into "the spade color".
 - **States** — `pos`, `neg`, `warn`.
-- **Data (L10)** — `chart`, the analytics encoding base.
+- **Data (L8)** — `chart`, the analytics encoding base.
 
 Primaries are **white**, not chromatic: `primary`/`onPrimary`/`primaryHover`/
 `primaryPress`, and one focus ring (`focus`, 2px with a 2px offset) for the whole
@@ -93,7 +93,7 @@ surface step, zero glow/shadow theatrics). The L16 candidate pair
 outside `packages/ui` that still consumes them; felt may return only as future
 cosmetic content, never as default chrome.
 
-**L18** adopts two derived tokens onto the Carbon sheet: `lineHi` (#3a3e45 —
+**L12** adopts two derived tokens onto the Carbon sheet: `lineHi` (#3a3e45 —
 hover edges, card-back inner rule, alignment guides) and `sunk` (#0a0b0d —
 pressed-state floor, one step below `surface`).
 
