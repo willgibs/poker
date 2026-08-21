@@ -1,3 +1,10 @@
+> **THIS IS THE ACADEMY BRANCH.** You are the Academy's agent, not the app's. Read
+> [`apps/academy/CLAUDE.md`](apps/academy/CLAUDE.md) FIRST — it is your founding contract.
+> The rest of this file is the host monorepo's engineering contract: useful as reference
+> for tooling (pnpm, TypeScript, test conventions), but its design budgets and laws do not
+> govern the Academy unless your lane adopts them. This banner exists only on the
+> `academy` branch.
+
 # CLAUDE.md — Contributor & Agent Guide
 
 Solo poker trainer: play NLHE vs humanlike bots, learn from deterministic analysis.
